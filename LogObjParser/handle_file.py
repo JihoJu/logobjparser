@@ -1,8 +1,8 @@
 import os
+import csv
 
 
 def get_filenames(dir_path: str):
-
     """ Extract all file names from that directory """
 
     if not os.path.isdir(dir_path):
@@ -14,7 +14,6 @@ def get_filenames(dir_path: str):
 
 
 def extract_log_from_files(indir: str):
-
     """ Extract from all files to log data str object """
 
     log_data = list()
@@ -26,3 +25,15 @@ def extract_log_from_files(indir: str):
         log_data.extend(log_lines)
 
     return log_data
+
+
+def output_obj_to_csv(datas, outdir="./"):
+    """ Show obj in csv format """
+
+    file = open(f"{outdir}result.csv", "w")
+    writer = csv.writer(file)
+
+    for data in datas:
+        writer.writerow(data)
+
+    file.close()
