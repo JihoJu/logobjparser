@@ -13,7 +13,7 @@ def get_filenames(dir_path: str):
     return file_list
 
 
-def extract_log_from_files(indir: str):
+def extract_log_from_files(in_dir: str):
 
     """
         Extract from all files to log data str object
@@ -23,19 +23,19 @@ def extract_log_from_files(indir: str):
 
     log_data = list()
 
-    files = get_filenames(indir)
+    files = get_filenames(in_dir)
     for file in files:
-        log_file = open(f"{indir}{file}", "rt")
+        log_file = open(f"{in_dir}{file}", "rt")
         log_lines = log_file.readlines()[:50]
         log_data.extend(log_lines)
 
     return log_data
 
 
-def output_obj_to_csv(datas, outdir="./"):
+def output_obj_to_csv(datas, out_dir="./"):
     """ Show obj in csv format """
 
-    file = open(f"{outdir}result.csv", "w")
+    file = open(f"{out_dir}result.csv", "w")
     writer = csv.writer(file)
 
     for data in datas:

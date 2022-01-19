@@ -11,7 +11,7 @@ class LogParser:
         self.log_line = ""  # 로그 한 줄 -> 각 str obj 를 인식 후 구 log 줄에서 없애 주기 위함
         self.obj_data = list()  # parsing 한 str obj => 일단 리스트 형태로 csv 에 넣어 주기 위함
         self.grok_patterns = upload_grok_obj()  # 사용할 grok patterns 객체들
-        self.valid_path_regx = upload_regex_obj()  # file_path 검증에 사용할 regx 객체들
+        self.valid_path_regex = upload_regex_obj()  # file_path 검증에 사용할 regx 객체들
 
     def subtract_obj_from_string(self, sub_regex):
 
@@ -24,7 +24,7 @@ class LogParser:
         self.log_line = sub_regex.sub(SUB_SIGN, self.log_line)
 
     @staticmethod
-    def is_valid_path(string: str, valid_path_regx):
+    def is_valid_path(string: str, valid_path_regex):
 
         """
             Check if the file path is correct
@@ -35,7 +35,7 @@ class LogParser:
         """
 
         if string and isinstance(string, str):
-            for regx in valid_path_regx:
+            for regx in valid_path_regex:
                 if regx.match(string):
                     return True
 
@@ -78,7 +78,7 @@ class LogParser:
         path_collection = (lambda fpath: list(fpath))(fp[0] for fp in path_regrex.findall(self.log_line))
 
         if path_collection:
-            is_file_path = self.get_valid_path(path_collection, self.valid_path_regx.values())
+            is_file_path = self.get_valid_path(path_collection, self.valid_path_regex.values())
             if not len(is_file_path):
                 return "None"
         else:
