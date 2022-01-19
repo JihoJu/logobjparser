@@ -1,6 +1,7 @@
 import re
 from pygrok import Grok
 
+""" Grok Pattern """
 TIME_PATTERN = "(?<time>%{TIME:time}([+]([0-9]*))?)"
 DATE_PATTERN = "(?<date>%{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[T ]|%{MONTH} %{MONTHDAY})"  # Custom Date pattern : 날짜 뒤 T 까지 추출
 URI_PATTERN = "%{URI:url}"
@@ -13,6 +14,7 @@ URI_GROK = Grok(URI_PATTERN)
 IP_GROK = Grok(IP_PATTERN)
 PATH_PATTERN = Grok(PATH_PATTERN)
 
+""" Regrex Pattern """
 MASTER_REGEX = re.compile(
     r"(/?([a-z.A-Z0-9\-_]+/)+[@a-zA-Z0-9\-_+.]+\.[a-zA-Z0-9]{1,10})[:-]?(\d+)?"
 )

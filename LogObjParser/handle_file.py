@@ -14,7 +14,12 @@ def get_filenames(dir_path: str):
 
 
 def extract_log_from_files(indir: str):
-    """ Extract from all files to log data str object """
+
+    """
+        Extract from all files to log data str object
+
+        각 파일 내 로그 한 줄씩 리스트 추가
+    """
 
     log_data = list()
 

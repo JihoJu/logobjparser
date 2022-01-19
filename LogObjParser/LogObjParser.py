@@ -1,26 +1,38 @@
 from LogObjParser.handle_pattern import upload_regex_obj, upload_grok_obj
 
-SUB_SIGN = "   #spec#   "
+SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 
 
 class LogParser:
     """ Object parsing log str obj """
 
     def __init__(self, data):
-        self.log_data = data
+        self.log_data = data  # 로그 파일들 안에 있는 모든 log data 를 한 줄씩 모아둔 리스트
         self.log_line = ""  # 로그 한 줄 -> 각 str obj 를 인식 후 구 log 줄에서 없애 주기 위함
-        self.obj_data = list()  # parsing 한 str obj => 일단 리스트로 csv 에 넣어 주기 위함
+        self.obj_data = list()  # parsing 한 str obj => 일단 리스트 형태로 csv 에 넣어 주기 위함
         self.grok_patterns = upload_grok_obj()  # 사용할 grok patterns 객체들
         self.valid_path_regx = upload_regex_obj()  # file_path 검증에 사용할 regx 객체들
 
     def subtract_obj_from_string(self, sub_regex):
-        """ Subtracting specific obj from log """
+
+        """
+            Subtracting specific obj from log
+
+            한 줄의 log data 에서 특정 obj 를 제거
+        """
 
         self.log_line = sub_regex.sub(SUB_SIGN, self.log_line)
 
     @staticmethod
     def is_valid_path(string: str, valid_path_regx):
-        """ Check if the file path is correct """
+
+        """
+            Check if the file path is correct
+
+            valid file path 인지 판별
+            valid : True 리턴
+            invalid : False 리턴
+        """
 
         if string and isinstance(string, str):
             for regx in valid_path_regx:
@@ -30,7 +42,16 @@ class LogParser:
         return False
 
     def get_valid_path(self, paths: list, valid_regx):
-        """ Select only valid file paths """
+
+        """
+            Select only valid file paths
+
+            file_path : valid 한 file path 를 담기 위한 list
+            paths: re.findall() 해서 뽑아온 모든 file path 후보
+            valid_regex : 후보들 중 정말 file path 인지 판별을 위한 regex obj list
+
+            path 후보가 file path 인지 판별 후 맞다면 path 의 마지막 문자가 " " 라면 공백 제거
+        """
 
         file_path = list()
 
@@ -43,7 +64,15 @@ class LogParser:
         return file_path
 
     def get_file_path(self):
-        """" Get valid file path string object """
+
+        """
+            Get valid file path string object
+
+            path_regrex : path obj 판별을 위한 grok pattern
+            path_collection : re.findall() 시 리턴된 값은 다음과 같은 튜플 형태로 리턴 -> 이 중 첫번째 값만을 가진 리스트
+                                            '/tmp/aa' -> ('/tmp/aa', '/tmp', '/aa', '/')
+            is_file_path : path_collection 에 있는 후보 중 valid file path 를 담은 리스트
+        """
 
         path_regrex = self.grok_patterns["PATH"].regex_obj
         path_collection = (lambda fpath: list(fpath))(fp[0] for fp in path_regrex.findall(self.log_line))
@@ -58,7 +87,14 @@ class LogParser:
         return is_file_path
 
     def get_time(self):
-        """ Get valid time string object """
+
+        """
+            Get valid time string object
+
+            is_time : time obj 판별을 위한 grok pattern
+            self.subtract_obj_from_string(self.grok_patterns["TIME"].regex_obj)
+                : log data 에서 time obj 제거
+        """
 
         is_time = self.grok_patterns["TIME"].match(self.log_line)
 
@@ -70,7 +106,14 @@ class LogParser:
         return is_time
 
     def get_date(self):
-        """ Get valid date string object """
+
+        """
+            Get valid date string object
+
+            is_date : time obj 판별을 위한 grok pattern
+            self.subtract_obj_from_string(self.grok_patterns["DATE"].regex_obj)
+                : log data 에서 date obj 제거
+        """
 
         is_date = self.grok_patterns["DATE"].match(self.log_line)
 
@@ -82,7 +125,14 @@ class LogParser:
         return is_date
 
     def get_uri(self):
-        """ Get valid uri string object """
+
+        """
+            Get valid uri string object
+
+            is_uri : time obj 판별을 위한 grok pattern
+            self.subtract_obj_from_string(self.grok_patterns["URI"].regex_obj)
+                : log data 에서 uri obj 제거
+        """
 
         is_uri = self.grok_patterns["URI"].match(self.log_line)
 
@@ -94,7 +144,14 @@ class LogParser:
         return is_uri
 
     def get_ip(self):
-        """ Get valid IP string object """
+
+        """
+            Get valid IP string object
+
+            is_ip : time obj 판별을 위한 grok pattern
+            self.subtract_obj_from_string(self.grok_patterns["IP"].regex_obj)
+                : log data 에서 IP obj 제거
+        """
 
         is_ip = self.grok_patterns["IP"].match(self.log_line)
 
@@ -106,9 +163,17 @@ class LogParser:
         return is_ip
 
     def parse(self):
-        """ Parsing all log datas """
 
-        self.obj_data.append(["Log", "Time", "Date", "Uri", "IP", "Path"])
+        """
+            Parsing all log datas
+
+            1. 모든 log data 를 한줄씩 읽는다.
+            2. time -> date -> uri -> ip -> path 순으로 obj 를 인식
+            3. 각 obj 를 인식한 후 log 에서 해당 obj 를 제거
+            4. obj_data 에 각 obj 를 담아 csv 로 출력
+        """
+
+        self.obj_data.append(["Log", "Time", "Date", "Uri", "IP", "Path"])  # output data 에 첫 행 데이터 추가
 
         for log in self.log_data:
             self.log_line = log
