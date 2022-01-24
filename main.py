@@ -1,9 +1,15 @@
-from LogObjParser import handle_file, LogObjParser
+import sys
+import click
+from LogObjParser import LogObjParser
 
-INPUT_DIR = "./logdata/"
+BASIC_PATH = "./logdata/"
+
+
+@click.command()
+@click.option("--path", '-p', help="Enter the file or directory path in str format", required=True)  # 파일 or 폴더 경로 입력
+def main(path=BASIC_PATH):
+    return LogObjParser.LogParser(path).run()
+
 
 if __name__ == '__main__':
-    log_data = handle_file.extract_log_from_files(INPUT_DIR)
-    logparser = LogObjParser.LogParser(log_data)
-    obj_data = logparser.parse()
-    handle_file.output_obj_to_csv(obj_data)
+    sys.exit(main())
