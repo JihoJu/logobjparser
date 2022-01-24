@@ -1,4 +1,5 @@
 from LogObjParser.handle_pattern import upload_regex_obj, upload_grok_obj
+from LogObjParser.handle_file import extract_log_from_path, output_obj_to_csv
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 
@@ -6,12 +7,54 @@ SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 
 class LogParser:
     """ Object parsing log str obj """
 
-    def __init__(self, data):
-        self.log_data = data  # 로그 파일들 안에 있는 모든 log data 를 한 줄씩 모아둔 리스트
+    def __init__(self, path):
+        self.in_path = path  # param 으로 입력 받은 파일 or 디렉터리 path
+        self.log_data = list()  # 로그 파일들 안에 있는 모든 log data 를 한 줄씩 모아둔 리스트
         self.log_line = ""  # 로그 한 줄 -> 각 str obj 를 인식 후 구 log 줄에서 없애 주기 위함
         self.obj_data = list()  # parsing 한 str obj => 일단 리스트 형태로 csv 에 넣어 주기 위함
         self.grok_patterns = upload_grok_obj()  # 사용할 grok patterns 객체들
         self.valid_path_regex = upload_regex_obj()  # file_path 검증에 사용할 regx 객체들
+
+    def run(self):
+
+        """
+            LogParser 객체 main 함수
+
+            - extract_log_from_path(self.in_path) : log_data 를 LogParser 객체 log_data 에 저장
+            - output_obj_to_csv(self.parse()) : 각 str obj 인식 후 csv 파일에 저장
+        """
+
+        self.log_data = extract_log_from_path(self.in_path)
+        if self.log_data is not None:  # 해당 경로에 파일 혹은 디렉터리가 존재
+            output_obj_to_csv(self.parse())
+
+        return 0
+
+    def parse(self):
+
+        """
+            Parsing all log datas
+
+            1. 모든 log data 를 한줄씩 읽는다.
+            2. time -> date -> uri -> ip -> path 순으로 obj 를 인식
+            3. 각 obj 를 인식한 후 log 에서 해당 obj 를 제거
+            4. obj_data 에 각 obj 를 담아 csv 로 출력
+        """
+
+        self.obj_data.append(["Log", "Time", "Date", "Uri", "IP", "Path"])  # output data 에 첫 행 데이터 추가
+
+        for log in self.log_data:
+            self.log_line = log
+
+            time = self.get_time()
+            date = self.get_date()
+            uri = self.get_uri()
+            ip = self.get_ip()
+            path = self.get_file_path()
+
+            self.obj_data.append([log, time, date, uri, ip, path])
+
+        return self.obj_data
 
     def subtract_obj_from_string(self, sub_regex):
 
@@ -161,29 +204,3 @@ class LogParser:
             return "None"
 
         return is_ip
-
-    def parse(self):
-
-        """
-            Parsing all log datas
-
-            1. 모든 log data 를 한줄씩 읽는다.
-            2. time -> date -> uri -> ip -> path 순으로 obj 를 인식
-            3. 각 obj 를 인식한 후 log 에서 해당 obj 를 제거
-            4. obj_data 에 각 obj 를 담아 csv 로 출력
-        """
-
-        self.obj_data.append(["Log", "Time", "Date", "Uri", "IP", "Path"])  # output data 에 첫 행 데이터 추가
-
-        for log in self.log_data:
-            self.log_line = log
-
-            time = self.get_time()
-            date = self.get_date()
-            uri = self.get_uri()
-            ip = self.get_ip()
-            path = self.get_file_path()
-
-            self.obj_data.append([log, time, date, uri, ip, path])
-
-        return self.obj_data
