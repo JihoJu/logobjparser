@@ -26,62 +26,9 @@ class LogParser:
 
         self.log_data = extract_log_from_path(self.in_path)
         if self.log_data is not None:  # 해당 경로에 파일 혹은 디렉터리 존재
-            # output_obj_to_csv(self.parse()) : 기존 parser
-            output_obj_to_csv(self.recognize_all_obj())  # issue4 를 위한 실행 코드
+            output_obj_to_csv(self.parse())
 
         return 0
-
-    def recognize_all_obj(self):
-
-        """
-            Time, Date, file path, URL 등을 각 로그 별로 인식 method
-        """
-        self.obj_data.append(["Log", "Time", "Date", "URI", "IP", "Path"])  # output data 에 첫 행 데이터 추가
-
-        obj_list = ["TIME", "DATE", "URI", "IP", "PATH"]
-
-        for log in self.log_data:
-            input_data = list()  # obj_data 에 추가될 리스트 (엑셀 기준: 행)
-            self.log_line = log
-
-            input_data.append(self.log_line)  # Log 열 부분에 들어갈 log 한 줄 데이터
-
-            # TIME ~ PATH 돌면서 findall 로 추출된 각 objs 를 input_data 에 순서대로 추가
-            for obj in obj_list:
-                recognized_objs = self.get_regrex_findall_objs(obj)
-                input_data.append(recognized_objs)
-
-            self.obj_data.append(input_data)
-
-        return self.obj_data
-
-    def get_regrex_findall_objs(self, obj_name: str):
-
-        """
-            각 obj_name regrex pattern 을 log 한 줄을 findall 하여 리턴
-
-            :param obj_name: 이미 생성한 grok pattern 을 구별을 위함
-            :return: log 한 줄에 해당 regrex findall 리스트
-        """
-
-        return_obj_list = list()
-        obj_regrex = self.grok_patterns[obj_name].regex_obj
-
-        is_objs = obj_regrex.findall(self.log_line)
-        if is_objs:
-            for is_obj in is_objs:
-                if obj_name == "PATH":
-                    return_obj_list.append(
-                        is_obj[0][1:].rstrip())  # findall 로 리턴된 튜플 안에서 1번째 path 가 가장 정확 (거의 대부분 앞에 =, " " 등 삭제)
-                elif obj_name == "IP":
-                    is_ip = is_obj[0].strip()
-                    if is_ip[0] == '"' or is_ip[0] == "=":  # IP 의 경우 string 첫번째 문자가 ", = 경우가 있어 제거
-                        is_ip = is_ip[1:]
-                    return_obj_list.append(is_ip)
-                else:
-                    return_obj_list.append(is_obj[0].strip())
-
-        return return_obj_list
 
     def parse(self):
 
