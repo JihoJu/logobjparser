@@ -25,7 +25,7 @@ class LogParser:
         """
 
         self.log_data = extract_log_from_path(self.in_path)
-        if self.log_data is not None:  # 해당 경로에 파일 혹은 디렉터리가 존재
+        if self.log_data is not None:  # 해당 경로에 파일 혹은 디렉터리 존재
             output_obj_to_csv(self.parse())
 
         return 0
