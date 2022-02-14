@@ -28,7 +28,7 @@ class LogIdentifier:
 
         return 0
 
-    def display_char_position_overlapping_part(self, param_data: OrderedDict):
+    def display_char_position_overlapping_part_by_ratio(self, param_data: OrderedDict):
 
         """
             Time, Date, IP, URI, File path 순으로 겹치는 부분이 있다면
@@ -61,6 +61,40 @@ class LogIdentifier:
 
         return overlap_list
 
+    def display_char_position_overlapping_part_by_in(self, param_data: OrderedDict):
+        """
+            Time, Date, IP, URI, File path 순으로 겹치는 부분이 있다면
+            해당 부분을 dict 으로 생성 후 overlapping list 에 추가
+
+            * overlapping 판단 기준 : 인식된 obj 를 띄어 쓰기 구분 후 해당 부분이 다른 obj 에 포함이 될 경우!!
+
+            :param:
+                param_data => OrderedDict([('TIME', []), ('DATE', []), ('URI', []), ('IP', []), ('PATH', [])])
+                obj_data_list => [('TIME', []), ('DATE', []), ('URI', []), ('IP', []), ('PATH', [])]
+                comp_obj : 비교 obj 변수 (comparison)
+            :return:
+        """
+
+        obj_data_list = list(param_data.items())  # dict -> tuple list
+        overlap_list = list()  # overlap info 가 담기는 List
+
+        for index, curr_obj in enumerate(reversed(obj_data_list)):
+            if len(curr_obj[1]) == 0:
+                continue
+            for comp_obj in obj_data_list[0:-(index + 1)]:
+                if len(comp_obj[1]) == 0:
+                    continue
+                for curr_str in curr_obj[1]:
+                    split_curr_str = curr_str.split(" ")
+                    for split_str in split_curr_str:
+                        if split_str.isdigit():  # 숫자만 있는 경우 (예) time : "17:18", path : "17" -> 방지
+                            continue
+                        for comp_str in comp_obj[1]:
+                            if split_str in comp_str:
+                                overlap_list.append({curr_obj[0]: curr_str, comp_obj[0]: comp_str})
+
+        return overlap_list
+
     def recognize_all_obj(self):
 
         """
@@ -88,7 +122,7 @@ class LogIdentifier:
                 arg_data[obj_name] = input_data[index + 1]
 
             # input data 에 overlapping position data 를 추가
-            input_data.append(self.display_char_position_overlapping_part(arg_data))  # log 한 줄 데이터 빼고 전달
+            input_data.append(self.display_char_position_overlapping_part_by_in(arg_data))  # log 한 줄 데이터 빼고 전달
 
             self.obj_data.append(input_data)
 
