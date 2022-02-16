@@ -9,7 +9,9 @@ class LogIdentifier:
         self.in_path = path  # param 으로 입력 받은 파일 or 디렉터리 path
         self.log_data = list()  # 로그 파일들 안에 있는 모든 log data 를 한 줄씩 모아둔 리스트
         self.log_line = ""  # 로그 한 줄 -> 각 str obj 를 인식 후 구 log 줄에서 없애 주기 위함
-        self.obj_data = list()  # parsing 한 str obj => 일단 리스트 형태로 csv 에 넣어 주기 위함
+        self.obj_type = ["TIME", "DATE", "URI", "IP", "PATH"]  # 인식하고자 하는 log obj 타입
+        self.obj_data = [["Log", "Time", "Date", "URI", "IP", "Path",
+                          "Overlapping Position"]]  # parsing 한 str obj => 일단 리스트 형태로 csv 에 넣어 주기 위함
         self.grok_patterns = upload_grok_obj()  # 사용할 grok patterns 객체들
         self.valid_path_regex = upload_regex_obj()  # file_path 검증에 사용할 regx 객체들
 
@@ -19,12 +21,12 @@ class LogIdentifier:
             LogParser 객체 main 함수
 
             - extract_log_from_path(self.in_path) : log_data 를 LogParser 객체 log_data 에 저장
-            - output_obj_to_csv(self.recognize_all_obj()) : 각 str obj 들을 인식 후 csv 파일에 저장
+            - output_obj_to_csv(self.recognize_all_log_objs()) : 각 str obj 들을 인식 후 csv 파일에 저장
         """
 
         self.log_data = extract_log_from_path(self.in_path)
         if self.log_data is not None:  # 해당 경로에 파일 혹은 디렉터리 존재
-            output_obj_to_csv(self.recognize_all_obj())  # issue4 를 위한 실행 코드
+            output_obj_to_csv(self.recognize_all_log_objs())  # issue4 를 위한 실행 코드
 
         return 0
 
@@ -41,6 +43,7 @@ class LogIdentifier:
                 obj_data_list => [('TIME', []), ('DATE', []), ('URI', []), ('IP', []), ('PATH', [])]
                 comp_obj : 비교 obj 변수 (comparison)
             :return:
+                overlap_list => [{”Path”: “/02/17 17”, “Date” : “/19/02/17”}, { ~~ }]
         """
 
         obj_data_list = list(param_data.items())  # dict -> tuple list
@@ -61,7 +64,7 @@ class LogIdentifier:
 
         return overlap_list
 
-    def display_char_position_overlapping_part_by_in(self, param_data: OrderedDict):
+    def detecting_overlap_of_log_objs(self, obj_data_list: list):
         """
             Time, Date, IP, URI, File path 순으로 겹치는 부분이 있다면
             해당 부분을 dict 으로 생성 후 overlapping list 에 추가
@@ -73,9 +76,9 @@ class LogIdentifier:
                 obj_data_list => [('TIME', []), ('DATE', []), ('URI', []), ('IP', []), ('PATH', [])]
                 comp_obj : 비교 obj 변수 (comparison)
             :return:
+                overlap_list => [{”Path”: “/02/17 17”, “Date” : “/19/02/17”}, { ~~ }]
         """
 
-        obj_data_list = list(param_data.items())  # dict -> tuple list
         overlap_list = list()  # overlap info 가 담기는 List
 
         for index, curr_obj in enumerate(reversed(obj_data_list)):
@@ -95,36 +98,27 @@ class LogIdentifier:
 
         return overlap_list
 
-    def recognize_all_obj(self):
+    def recognize_all_log_objs(self):
 
         """
             Time, Date, file path, URL 등을 각 로그 별로 인식 method
         """
-        self.obj_data.append(
-            ["Log", "Time", "Date", "URI", "IP", "Path", "Overlapping Position"])  # output data 에 첫 행 데이터 추가
-
-        obj_list = ["TIME", "DATE", "URI", "IP", "PATH"]
 
         for log in self.log_data:
-            input_data = list()  # obj_data 에 추가될 리스트 (엑셀 기준: 행)
             self.log_line = log
 
-            input_data.append(self.log_line)  # Log 열 부분에 들어갈 log 한 줄 데이터
+            arg_data = OrderedDict()  # Log, Time, Date ~ File Path 등 각 type 에 대한 log obj 데이터 저장
+            arg_data["LOG"] = self.log_line
 
             # TIME ~ PATH 돌면서 findall 로 추출된 각 objs 를 input_data 에 순서대로 추가
-            for obj in obj_list:
+            for obj in self.obj_type:
                 recognized_objs = self.get_regrex_findall_objs(obj)
-                input_data.append(recognized_objs)
+                arg_data[obj] = recognized_objs
 
-            # display_char_position_overlapping_part 에 넘겨줄 인자로 obj name 과 해당 obj list 를 매칭 후 dict 형태로 구성
-            arg_data = OrderedDict()
-            for index, obj_name in enumerate(obj_list):
-                arg_data[obj_name] = input_data[index + 1]
+            arg_data["Overlapping Objs"] = self.detecting_overlap_of_log_objs(list(arg_data.items())[1:])
 
-            # input data 에 overlapping position data 를 추가
-            input_data.append(self.display_char_position_overlapping_part_by_in(arg_data))  # log 한 줄 데이터 빼고 전달
-
-            self.obj_data.append(input_data)
+            data_in_csv = [obj[1] for obj in list(arg_data.items())]  # csv 각 행에 들어갈 log obj 리스트 데이터
+            self.obj_data.append(data_in_csv)
 
         return self.obj_data
 
