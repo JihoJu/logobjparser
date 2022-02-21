@@ -43,7 +43,7 @@ def extract_log_from_dir(in_dir: str):
     files = get_filenames(in_dir)
     for file in files:
         log_file = open(f"{in_dir}/{file}", "rt")
-        log_lines = log_file.readlines()[:50]
+        log_lines = log_file.readlines()[:1000]
         log_data.extend(log_lines)
 
     return log_data
