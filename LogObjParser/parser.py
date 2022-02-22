@@ -1,6 +1,7 @@
 from collections import OrderedDict
-from LogObjParser.handle_pattern import upload_regex_obj, upload_grok_obj
+from LogObjParser.handle_pattern import upload_regex_obj, upload_grok_obj, SUBTRACT_TIME_GROK
 
+SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH"]
 
 
@@ -36,9 +37,12 @@ def get_all_objs(log: str, obj_type: str):
     """
 
     return_obj_list = list()
-    obj_regrex = upload_grok_obj()[obj_type].regex_obj
+    regex_obj = upload_grok_obj()[obj_type].regex_obj
 
-    is_objs = obj_regrex.findall(log)
+    if obj_type == "TIME":
+        is_objs = get_time_objs(log, regex_obj)
+    else:
+        is_objs = regex_obj.findall(log)
 
     if is_objs:
         for is_obj in is_objs:
@@ -54,3 +58,22 @@ def get_all_objs(log: str, obj_type: str):
                 return_obj_list.append(is_obj[0].strip())
 
     return return_obj_list
+
+
+def get_time_objs(log: str, regex_obj):
+    """
+        Time obj 가 아닌 정보를 인식 문제를 해결 위한 함수로 3개에 해당 obj 를 subtract from a log data
+        - {"address": "0000:00:06.2} -> "TIME": '00:00:06.2'
+        - is set to 000:00:00:00.000 -> "TIME": '00:00:00:00'
+        - 02:42:ac:ff:fe:11:00:02 -> "TIME": '11:00:02'
+
+        :param log: log data 한 줄, type: str
+        :param regex_obj: Time grok pattern 을 regrex 객체로 변환한 re 객체
+        :return: log data 한 개에서 time obj 를 findall 로 인식한 리스트 안 튜플 data structure
+    """
+
+    sub_log = SUBTRACT_TIME_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+
+    is_time_objs = regex_obj.findall(sub_log)
+
+    return is_time_objs
