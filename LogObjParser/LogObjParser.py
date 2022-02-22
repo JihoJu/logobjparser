@@ -2,9 +2,6 @@ from LogObjParser.handle_file import extract_log_from_path, output_obj_to_csv
 from LogObjParser.parser import parse_log_data
 
 
-# SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
-
-
 class LogParser:
     """ Object parsing log str obj """
 
