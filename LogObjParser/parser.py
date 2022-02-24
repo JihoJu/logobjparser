@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from LogObjParser.handle_pattern import upload_regex_obj, upload_grok_obj, SUBTRACT_TIME_GROK, SUBTRACT_PATH_GROK
+from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, SUBTRACT_TIME_GROK
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH"]
@@ -91,7 +91,11 @@ def get_path_objs(log: str, regex_obj):
         :param regex_obj: File path grok pattern 을 regrex 객체로 변환한 re 객체
         :return: log data 한 개에서 file path obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
-    sub_log = SUBTRACT_PATH_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+    sub_regex = upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
+
+    sub_log = log
+    for regex in sub_regex.values():
+        sub_log = regex.sub(SUB_SIGN, sub_log)  # log data 에서 subtract 할 regex pattern 객체
 
     is_path_objs = regex_obj.findall(sub_log)
 
