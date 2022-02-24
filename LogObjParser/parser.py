@@ -51,12 +51,10 @@ def get_all_objs(log: str, obj_type: str):
     for is_obj in is_objs:
         if obj_type == "PATH":
             # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
-            return_obj_list.append(
-                is_obj[0][1:].strip('()[]{}\"\',.:= '))
+            is_path = is_obj[0][1:].strip('()[]{}\"\',.:= ')
+            return_obj_list.append(is_path)
         elif obj_type == "IP":
-            is_ip = is_obj[0].strip()
-            if is_ip[0] == '"' or is_ip[0] == "=":  # IP 의 경우 string 첫번째 문자가 ", = 경우가 있어 제거
-                is_ip = is_ip[1:]
+            is_ip = is_obj[0].strip('\"\'[]()=@ ')  # IP 의 경우 string 첫번째 문자가 ", = 경우가 있어 제거
             return_obj_list.append(is_ip)
         else:
             return_obj_list.append(is_obj[0].strip())
