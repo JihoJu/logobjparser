@@ -2,8 +2,8 @@ import re
 from pygrok import Grok
 
 """ Grok Pattern """
-TIME_PATTERN = "(?<time>%{TIME:time}([+]([0-9]*))?)"
-DATE_PATTERN = "(?<date>%{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[T ]|%{DAY}([\S])? %{MONTHDAY} %{MONTH} %{YEAR}|%{MONTHDAY} %{MONTH} %{YEAR}|%{MONTH} %{YEAR}|%{YEAR} %{MONTH} %{MONTHDAY}|%{DAY} %{MONTH} %{MONTHDAY}|%{MONTH} %{MONTHDAY})"  # Custom Date pattern : 날짜 뒤 T 까지 추출
+TIME_PATTERN = "(?<time>(?!<[0-9])%{HOUR}:%{MINUTE}[Z]|%{TIME:time}([+]([0-9]*))?[Z]?)"
+DATE_PATTERN = "(?<date>%{MONTHDAY}/%{MONTH}/%{YEAR}|%{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[T ]|%{DAY}([\S])? %{MONTHDAY} %{MONTH} %{YEAR}|%{MONTHDAY} %{MONTH} %{YEAR}|%{MONTH} %{YEAR}|%{YEAR} %{MONTH} %{MONTHDAY}|%{DAY} %{MONTH} %{MONTHDAY}|%{MONTH} %{MONTHDAY})"  # Custom Date pattern : 날짜 뒤 T 까지 추출
 URI_PATTERN = "(?<url>%{URI}|GET %{PATH}[\S]*|POST %{PATH}[\S]*|PUT %{PATH}[\S]*|DELETE %{PATH}[\S]*)"
 IP_PATTERN = "(?<ip>%{HOSTNAME}[/:]%{IPV4}([:]%{POSINT})?|[/]%{IPV4}([:]%{POSINT})?|[^-]%{IPV4}([:]%{POSINT})?)"  # 마지막 pattern 은 수정이 필요 : =155.~~ -를 제외한 특수문자를 다 가져옴.
 PATH_PATTERN = "(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
