@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, SUBTRACT_TIME_GROK
+from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, SUBTRACT_TIME_GROK, URI_GROK
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH"]
@@ -41,24 +41,25 @@ def get_all_objs(log: str, obj_type: str):
 
     if obj_type == "TIME":
         is_objs = get_time_objs(log, regex_obj)
+    elif obj_type == "IP":
+        is_objs = get_ip_objs(log, regex_obj)
     elif obj_type == "PATH":
         is_objs = get_path_objs(log, regex_obj)
     else:
         is_objs = regex_obj.findall(log)
 
-    if is_objs:
-        for is_obj in is_objs:
-            if obj_type == "PATH":
-                # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
-                return_obj_list.append(
-                    is_obj[0][1:].strip('()[]{}\"\',.:= '))
-            elif obj_type == "IP":
-                is_ip = is_obj[0].strip()
-                if is_ip[0] == '"' or is_ip[0] == "=":  # IP 의 경우 string 첫번째 문자가 ", = 경우가 있어 제거
-                    is_ip = is_ip[1:]
-                return_obj_list.append(is_ip)
-            else:
-                return_obj_list.append(is_obj[0].strip())
+    for is_obj in is_objs:
+        if obj_type == "PATH":
+            # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
+            return_obj_list.append(
+                is_obj[0][1:].strip('()[]{}\"\',.:= '))
+        elif obj_type == "IP":
+            is_ip = is_obj[0].strip()
+            if is_ip[0] == '"' or is_ip[0] == "=":  # IP 의 경우 string 첫번째 문자가 ", = 경우가 있어 제거
+                is_ip = is_ip[1:]
+            return_obj_list.append(is_ip)
+        else:
+            return_obj_list.append(is_obj[0].strip())
 
     return return_obj_list
 
@@ -100,3 +101,25 @@ def get_path_objs(log: str, regex_obj):
     is_path_objs = regex_obj.findall(sub_log)
 
     return is_path_objs
+
+
+def get_ip_objs(log: str, regex_obj):
+    """
+        IP obj 가 Overlapping 되는 경우
+            - 'http://192.168.122.122:9292/v1/images/53664ce3-7125-48c1-974e-eceb6f69d912#012x-image-meta-min_ram:'
+            - 'URI': 'http://192.168.122.122:9292/v1/images/53664ce3-7125-48c1-974e-eceb6f69d912#012x-image-meta-min_ram:'
+            - 'IP': '/192.168.122.122:9292'
+        => Overlapping 된 IP obj 가 URI 에 포함 관계
+
+        IP obj 를 인식하기 전에 log data 에서 URI obj 를 subtract 해주자
+
+        :param log: log data 한 줄, type: str
+        :param regex_obj: IP grok pattern 을 regrex 객체로 변환한 re 객체
+        :return: log data 한 개에서 IP obj 를 findall 로 인식한 리스트 안 튜플 data structure
+    """
+
+    sub_log = URI_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+
+    is_ip_objs = regex_obj.findall(sub_log)
+
+    return is_ip_objs
