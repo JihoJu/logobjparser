@@ -75,3 +75,18 @@ def upload_regex_obj():
     collection_regex["JUST_VIM_TEMP_FILE"] = JUST_VIM_TEMP_FILE
 
     return collection_regex
+
+
+def upload_sub_path_regex():
+    """
+        Returns sub regrex objects after converting them to a dict
+        Before recognizing path obj in log data, the regex pattern to be subtracted
+    """
+
+    collection_regex = dict()
+
+    collection_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH_GROK.regex_obj
+    collection_regex["URI_REGEX"] = URI_GROK.regex_obj
+    collection_regex["IP_REGEX"] = IP_GROK.regex_obj
+
+    return collection_regex
