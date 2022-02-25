@@ -51,7 +51,7 @@ def get_all_objs(log: str, obj_type: str):
     for is_obj in is_objs:
         if obj_type == "PATH":
             # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
-            is_path = is_obj[0][1:].strip('()[]{}\"\',.:= ')
+            is_path = is_obj[0].strip('<>()[]{}\"\',.:=\\n ')
             return_obj_list.append(is_path)
         elif obj_type == "URI":
             is_uri = is_obj[0].strip('()=:[]\'\", ')  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
@@ -76,7 +76,6 @@ def get_time_objs(log: str, regex_obj):
         :param regex_obj: Time grok pattern 을 regrex 객체로 변환한 re 객체
         :return: log data 한 개에서 time obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
-
     sub_log = SUBTRACT_TIME_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
 
     is_time_objs = regex_obj.findall(sub_log)
