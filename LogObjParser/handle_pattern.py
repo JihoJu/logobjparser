@@ -40,24 +40,6 @@ def upload_grok_obj():
     return collection_grok
 
 
-def upload_regex_obj():
-    """ Returns regrex objects after converting them to a dict """
-
-    collection_regex = dict()
-
-    collection_regex["MASTER_REGEX"] = MASTER_REGEX
-    collection_regex["MASTER_REGEX_MORE_EXTENSIONS"] = MASTER_REGEX_MORE_EXTENSIONS
-    collection_regex["HOMEDIR_REGEX"] = HOMEDIR_REGEX
-    collection_regex["OTHER_BGS_RESULT_REGEX"] = OTHER_BGS_RESULT_REGEX
-    collection_regex["ENTIRE_TRIMMED_LINE_IF_NOT_WHITESPACE"] = ENTIRE_TRIMMED_LINE_IF_NOT_WHITESPACE
-    collection_regex["JUST_FILE_WITH_NUMBER"] = JUST_FILE_WITH_NUMBER
-    collection_regex["JUST_FILE"] = JUST_FILE
-    collection_regex["JUST_EMACS_TEMP_FILE"] = JUST_EMACS_TEMP_FILE
-    collection_regex["JUST_VIM_TEMP_FILE"] = JUST_VIM_TEMP_FILE
-
-    return collection_regex
-
-
 def upload_sub_ip_regex():
     """
         Returns sub regrex objects after converting them to a dict
