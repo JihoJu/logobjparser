@@ -76,6 +76,7 @@ def get_time_objs(log: str, regex_obj):
         :param regex_obj: Time grok pattern 을 regrex 객체로 변환한 re 객체
         :return: log data 한 개에서 time obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
+
     sub_log = SUBTRACT_TIME_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
 
     is_time_objs = regex_obj.findall(sub_log)
@@ -92,6 +93,7 @@ def get_path_objs(log: str, regex_obj):
         :param regex_obj: File path grok pattern 을 regrex 객체로 변환한 re 객체
         :return: log data 한 개에서 file path obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
+
     sub_regex = upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
     sub_log = log
@@ -120,6 +122,7 @@ def get_ip_objs(log: str, regex_obj):
         :param regex_obj: IP grok pattern 을 regrex 객체로 변환한 re 객체
         :return: log data 한 개에서 IP obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
+
     sub_regex = upload_sub_ip_regex()  # 위의 주석의 경우와 URI 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
     sub_log = log
