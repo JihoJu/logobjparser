@@ -7,12 +7,14 @@ DATE_PATTERN = "(?<date>%{MONTHDAY}/%{MONTH}/%{YEAR}|%{YEAR}[/-]%{MONTHNUM}[/-]%
 URI_PATTERN = "(?<url>%{URI}|GET %{PATH}[\S]*|POST %{PATH}[\S]*|PUT %{PATH}[\S]*|DELETE %{PATH}[\S]*)"
 IP_PATTERN = "(?<ip>%{HOSTNAME}[/:]%{IPV4}([:](?:[0-9][0-9]*))?|[/]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[^-]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[-]%{IPV4}[-])"  # 마지막 pattern 은 수정이 필요 : =155.~~ -를 제외한 특수문자를 다 가져옴.
 PATH_PATTERN = "(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
+JSON_PATTERN = "(?<json>{(%{QUOTEDSTRING}[\s]?: [\w\W]*[,\s]*)*})"
 
 TIME_GROK = Grok(TIME_PATTERN)
 DATE_GROK = Grok(DATE_PATTERN)
 URI_GROK = Grok(URI_PATTERN)
 IP_GROK = Grok(IP_PATTERN)
 PATH_PATTERN = Grok(PATH_PATTERN)
+JSON_PATTERN = Grok(JSON_PATTERN)
 
 """ Time Regrex Pattern for validation """
 SUBTRACT_TIME_PATTERN = "(?<sub_time>0{3,}:0{2,}:|0{3,}:|%{MAC}([:]\d*)*)"
@@ -36,6 +38,7 @@ def upload_grok_obj():
     collection_grok["URI"] = URI_GROK
     collection_grok["IP"] = IP_GROK
     collection_grok["PATH"] = PATH_PATTERN
+    collection_grok["JSON"] = JSON_PATTERN
 
     return collection_grok
 

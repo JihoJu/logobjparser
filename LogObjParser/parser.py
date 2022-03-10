@@ -2,7 +2,7 @@ from collections import OrderedDict
 from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, SUBTRACT_TIME_GROK
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
-TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH"]
+TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON"]
 
 
 def parse_log_data(log: str):
