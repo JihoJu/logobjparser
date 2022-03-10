@@ -63,7 +63,7 @@ def extract_log_from_file(in_file: str):
     return log_data
 
 
-def output_obj_to_csv(datas, out_dir="./"):
+def output_obj_to_csv(datas, out_dir="./result/"):
     """ Show obj in csv format """
 
     file = open(f"{out_dir}result.csv", "w")
