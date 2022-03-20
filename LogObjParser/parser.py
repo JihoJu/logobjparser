@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, SUBTRACT_TIME_GROK
+import json
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON"]
@@ -45,6 +46,9 @@ def get_all_objs(log: str, obj_type: str):
         is_objs = get_ip_objs(log, regex_obj)
     elif obj_type == "PATH":
         is_objs = get_path_objs(log, regex_obj)
+    elif obj_type == "JSON":
+        is_objs = get_json_objs(log)
+        return is_objs
     else:
         is_objs = regex_obj.findall(log)
 
@@ -132,3 +136,61 @@ def get_ip_objs(log: str, regex_obj):
     is_ip_objs = regex_obj.findall(sub_log)
 
     return is_ip_objs
+
+
+def validateJSON(jsonData):
+    try:
+        json.loads(jsonData)
+    except ValueError as err:
+        return False
+    return True
+
+
+def get_could_be_json(log: str):
+    """
+        설명: log data 를 input 으로 log 한 줄 내에 있는 json 형식일 수도 있는 obj 들을 모두 모아 리턴
+        json 형식일 수도 있다는 것의 기준: { 와 } 가 개수가 맞을 경우 -> Parenthesis 가 valid 한 경우를 json 형식 이라 가정
+
+        :param log: log data 한 문장
+        :return json_list: log data 내에 있는 json 인지를 판별할 str obj 를 모아둔 리스트
+    """
+    stack = list()
+    json_list = list()
+
+    for index, s in enumerate(log):
+        if s == '{':
+            if len(stack) == 0:
+                start_idx = index
+            stack.append(s)
+        elif s == '}':
+            if len(stack) == 0:
+                stack.clear()
+                continue
+            stack.pop()
+            if len(stack) == 0:
+                end_idx = index
+                json_list.append(log[start_idx: end_idx + 1])
+
+    return json_list
+
+
+def get_json_objs(log: str):
+    """
+        obj.replace('\'', '\"'):
+            - log data 에서 valid 한 json 형식이 아니지만 json 형식으로 써놓은 것들이 있다.
+            - valid => {"log": data}
+            - invalid => {'log': data}
+            - 일단 ' 를 " 로 변경 후 json obj 가 valid 한 지 판단
+
+        :param log: log data 한 문장
+        :return is_json_objs: log 한 data 에서 valid 한 json obj 들을 모아 list 형태로 return
+    """
+
+    is_json_objs = list()
+
+    obj_list = get_could_be_json(log)
+    for obj in obj_list:
+        if validateJSON(obj.replace('\'', '\"')):   # 설명
+            is_json_objs.append(obj)
+
+    return is_json_objs
