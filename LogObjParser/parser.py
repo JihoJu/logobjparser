@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, SUBTRACT_TIME_GROK
+import ast
 import json
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
@@ -140,8 +141,10 @@ def get_ip_objs(log: str, regex_obj):
 
 def validateJSON(jsonData):
     try:
-        json.loads(jsonData)
-    except ValueError as err:
+        json.loads(json.dumps(ast.literal_eval(jsonData)))
+    except SyntaxError:
+        return False
+    except ValueError:
         return False
     return True
 
