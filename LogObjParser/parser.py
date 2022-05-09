@@ -2,9 +2,10 @@ from collections import OrderedDict
 from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, SUBTRACT_TIME_GROK
 import ast
 import json
+import xml.etree.ElementTree as ET
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
-TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON"]
+TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON", "XML"]
 
 
 def parse_log_data(log: str):
@@ -39,7 +40,8 @@ def get_all_objs(log: str, obj_type: str):
     """
 
     return_obj_list = list()
-    regex_obj = upload_grok_obj()[obj_type].regex_obj
+    if obj_type != "XML":
+        regex_obj = upload_grok_obj()[obj_type].regex_obj
 
     if obj_type == "TIME":
         is_objs = get_time_objs(log, regex_obj)
@@ -49,6 +51,9 @@ def get_all_objs(log: str, obj_type: str):
         is_objs = get_path_objs(log, regex_obj)
     elif obj_type == "JSON":
         is_objs = get_json_objs(log)
+        return is_objs
+    elif obj_type == "XML":
+        is_objs = get_xml_objs(log)
         return is_objs
     else:
         is_objs = regex_obj.findall(log)
@@ -193,7 +198,80 @@ def get_json_objs(log: str):
 
     obj_list = get_could_be_json(log)
     for obj in obj_list:
-        if validateJSON(obj.replace('\'', '\"')):   # 설명
+        if validateJSON(obj.replace('\'', '\"')):  # 설명
             is_json_objs.append(obj)
 
     return is_json_objs
+
+
+def is_validate_xml(xml: str):
+    """ Check if obj that could be xml is valid
+
+        :param xml: string obj could be xml
+        :return: xml 이 맞다면 true, 아니면 false
+    """
+    try:
+        ET.fromstring(xml)
+    except SyntaxError:
+        return False
+    except ValueError:
+        return False
+    return True
+
+
+def get_xml_last_index(start: int, word: str, log: str):
+    """ word (xml tag) 에 대응하는 end tag index 반환
+
+        :param start: log data 에서 word 를 찾기 시작할 시작 index
+        :param word: xml start tag
+        :param log: a log data
+        :return: start tag 대응 end tag 가 존재: end tag index / 존재 x: -1
+    """
+    index = start + 1
+    while index != -1:
+        index = log.find(word, index)
+        if index > -1:
+            return index + len(word)
+    return -1
+
+
+def get_could_xml_objs(log: str):
+    """ Extract all obj that can be xml obj
+
+        :param log: a log data
+        :return: all obj that can be xml
+    """
+
+    is_could_xml = list()
+
+    index = 0
+    end_idx = 0  # last tag index in xml obj
+    for idx in range(0, len(log)):
+        if idx < end_idx:
+            continue
+        if log[idx] == "<":
+            index = idx + 1
+        elif log[idx] == ">":
+            word = log[index:idx].split(" ")[0]  # tag 를 word 변수에 할당 ex) <domain type="qemu">
+            finding_word = f"</{word}>"
+            end_idx = get_xml_last_index(idx + 1, finding_word, log)
+            if end_idx != -1:
+                is_could_xml.append(log[index - 1: end_idx])
+
+    return is_could_xml
+
+
+def get_xml_objs(log: str):
+    """ Extract XML object from log data
+
+    :param log: A log data
+    :return xml_obj: xml objects
+    """
+    xml_obj = list()
+
+    is_xml = get_could_xml_objs(log)
+    for xml in is_xml:
+        if is_validate_xml(xml):
+            xml_obj.append(xml)
+
+    return xml_obj
