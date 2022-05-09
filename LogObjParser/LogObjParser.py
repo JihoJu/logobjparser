@@ -36,7 +36,7 @@ class LogParser:
             4. self.csv_data 에 parsing 된 obj 를 담아 csv 로 출력
         """
 
-        self.csv_data.append(["Log", "Time", "Date", "Uri", "IP", "Path"])  # output data (in csv) 에 첫 행 데이터 추가
+        self.csv_data.append(["Log", "Time", "Date", "Uri", "IP", "Path", "JSON"])  # output data (in csv) 에 첫 행 데이터 추가
 
         for log in self.log_data:
             parsed_data = parse_log_data(log)  # LOG, TIME, URI, IP, PATH 에 대한 obj 들이 담긴 OrderDict 객체
