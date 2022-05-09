@@ -5,7 +5,7 @@ import json
 import xml.etree.ElementTree as ET
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
-TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON"]
+TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON", "XML"]
 
 
 def parse_log_data(log: str):
@@ -40,7 +40,8 @@ def get_all_objs(log: str, obj_type: str):
     """
 
     return_obj_list = list()
-    regex_obj = upload_grok_obj()[obj_type].regex_obj
+    if obj_type != "XML":
+        regex_obj = upload_grok_obj()[obj_type].regex_obj
 
     if obj_type == "TIME":
         is_objs = get_time_objs(log, regex_obj)
@@ -50,6 +51,9 @@ def get_all_objs(log: str, obj_type: str):
         is_objs = get_path_objs(log, regex_obj)
     elif obj_type == "JSON":
         is_objs = get_json_objs(log)
+        return is_objs
+    elif obj_type == "XML":
+        is_objs = get_xml_objs(log)
         return is_objs
     else:
         is_objs = regex_obj.findall(log)
@@ -240,6 +244,7 @@ def get_could_xml_objs(log: str):
 
     is_could_xml = list()
 
+    index = 0
     end_idx = 0  # last tag index in xml obj
     for idx in range(0, len(log)):
         if idx < end_idx:
