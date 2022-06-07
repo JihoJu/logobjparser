@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, SUBTRACT_TIME_GROK
+from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, \
+    SUBTRACT_TIME_GROK, upload_replace_exception_case_regex_in_json, OPENSTACK_GROK_IN_JSON, DATETIME_GROK_IN_JSON
 import ast
 import json
 import xml.etree.ElementTree as ET
@@ -182,6 +183,51 @@ def get_could_be_json(log: str):
     return json_list
 
 
+def check_exception_case_in_json(json_obj: str):
+    """ Determine if obj is included in the json exception case
+
+        다음 case 에 포함이 된다면 json format 에 맞게 replace
+
+        1. openstack object
+            - <KeystoneToken ~>, <nova.api.~>, etc 가 포함되어 있는 case
+                - "{..., 'token': <KeystoneToken (audit_id=Ax_ByWknSh6oMIA4tCd41w, \
+                        audit_chain_id=Ax_ByWknSh6oMIA4tCd41w) at 0x7f4222e832a0>, ...}"
+                - "{'action': u'detail', 'controller': <nova.api.openstack.wsgi.Resource object at 0x469e5d0>}"
+
+            - '"' 로 감싸준 뒤 json validation 과정을 수행 (string type 으로 변환)
+
+        2. python datetime object
+            - "{u'created_at': datetime.datetime(2013, 10, 30, 14, 20, 44), \
+                u'updated_at': datetime.datetime(2014, 8, 11, 8, 18, 47), u'disabled': False}"
+
+            - datetime.~~ str obj 가 포함되어 있는 case
+            - '"' 로 감싸준 뒤 json validation 과정을 수행 (string type 으로 변환)
+
+        3. suffix 'L'
+            - "{u'report_count': 2397970L, u'disabled': False, u'deleted_at': None, u'disabled_reason': None, u'id': 5L}"
+            - 숫자 뒤 L 를 빼고 json validation 과정을 수행
+
+        :param json_obj: str type 의 could be json obj
+        :return json_obj: 특정 case 가 replace 된 json obj (예외 case 에 해당되는 경우)
+    """
+    exception_regex = upload_replace_exception_case_regex_in_json()
+
+    if OPENSTACK_GROK_IN_JSON.match(json_obj):
+        exc_list = exception_regex["OPENSTACK_REGEX"].findall(json_obj)
+        for exc in exc_list:
+            json_obj = json_obj.replace(exc, '"' + exc + '"')
+    if DATETIME_GROK_IN_JSON.match(json_obj):
+        exc_list = exception_regex["DATETIME_REGEX"].findall(json_obj)
+        for exc in exc_list:
+            json_obj = json_obj.replace(exc, '"' + exc + '"')
+    if exception_regex["LONG_DIGIT_REGEX"].findall(json_obj):
+        exc_list = exception_regex["LONG_DIGIT_REGEX"].findall(json_obj)
+        for exc in exc_list:
+            json_obj = json_obj.replace(exc, exc[:-1])
+
+    return json_obj
+
+
 def get_json_objs(log: str):
     """
         obj.replace('\'', '\"'):
@@ -198,7 +244,8 @@ def get_json_objs(log: str):
 
     obj_list = get_could_be_json(log)
     for obj in obj_list:
-        if validateJSON(obj.replace('\'', '\"')):  # 설명
+        parsed_obj = check_exception_case_in_json(obj.replace('\'', '\"'))
+        if validateJSON(parsed_obj):  # 설명
             is_json_objs.append(obj)
 
     return is_json_objs

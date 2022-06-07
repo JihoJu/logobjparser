@@ -9,12 +9,18 @@ IP_PATTERN = "(?<ip>%{HOSTNAME}[/:]%{IPV4}([:](?:[0-9][0-9]*))?|[/]%{IPV4}([:](?
 PATH_PATTERN = "(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
 JSON_PATTERN = "(?<json>{(%{QUOTEDSTRING}[\s]?: [\w\W]*[,\s]*)*})"
 
+""" Grok Pattern for Json Exception Case """
+OPENSTACK_PATTERN_IN_JSON = "(?<json>(%{QUOTEDSTRING}: (<[\S\s]*>)+)+)"  # "key": <KeyStone~~>
+DATETIME_PATTERN_IN_JSON = "(?<json>(%{QUOTEDSTRING}: datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)))"  # "key": datetime.~
+
 TIME_GROK = Grok(TIME_PATTERN)
 DATE_GROK = Grok(DATE_PATTERN)
 URI_GROK = Grok(URI_PATTERN)
 IP_GROK = Grok(IP_PATTERN)
 PATH_PATTERN = Grok(PATH_PATTERN)
 JSON_PATTERN = Grok(JSON_PATTERN)
+OPENSTACK_GROK_IN_JSON = Grok(OPENSTACK_PATTERN_IN_JSON)
+DATETIME_GROK_IN_JSON = Grok(DATETIME_PATTERN_IN_JSON)
 
 """ Time Regrex Pattern for validation """
 SUBTRACT_TIME_PATTERN = "(?<sub_time>0{3,}:0{2,}:|0{3,}:|%{MAC}([:]\d*)*)"
@@ -26,6 +32,11 @@ SUBTRACT_IP_REGEX = re.compile(r'\\n')
 """ File Path Regrex Pattern for validation """
 SUBTRACT_PATH_PATTERN = "(?<sub_path>( [^/ ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
 SUBTRACT_PATH_GROK = Grok(SUBTRACT_PATH_PATTERN)
+
+""" Exception Regrex Pattern for Json Validation """
+OPENSTACK_REGEX = re.compile(r"(<[\S\s]*>)+")  # openstack object: <nova.api.~>, <KeyStone~>
+LONG_DIGIT_REGEX = re.compile(r"[\d]+[L|l]+")  # suffix 'L': 0L, 23345L
+DATETIME_REGEX = re.compile(r"datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)")  # datetime object: datetime.datetime(~)
 
 
 def upload_grok_obj():
@@ -68,5 +79,24 @@ def upload_sub_path_regex():
     collection_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH_GROK.regex_obj
     collection_regex["URI_REGEX"] = URI_GROK.regex_obj
     collection_regex["IP_REGEX"] = IP_GROK.regex_obj
+
+    return collection_regex
+
+
+def upload_replace_exception_case_regex_in_json():
+    """
+        Returns sub regrex objects after converting them to a dict
+        Before validating json obj in log data, the regex pattern to be replaced
+
+        - openstack obj: <KeyStone ~~>, <glance.api~>, <nova.api.~> etc...
+        - suffix 'L' or 'l': 0L, 34531L etc...
+        - datetime obj: datetime.datetime(2014, 8, 11, 8, 18, 47) etc...
+    """
+
+    collection_regex = dict()
+
+    collection_regex["OPENSTACK_REGEX"] = OPENSTACK_REGEX
+    collection_regex["LONG_DIGIT_REGEX"] = LONG_DIGIT_REGEX
+    collection_regex["DATETIME_REGEX"] = DATETIME_REGEX
 
     return collection_regex
