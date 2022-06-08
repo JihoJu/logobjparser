@@ -145,13 +145,30 @@ def get_ip_objs(log: str, regex_obj):
     return is_ip_objs
 
 
-def validateJSON(jsonData):
+def validateJSON(jsonData: str):
+    """ Validate if obj is json format
+
+        - ast.literal_eval(jsonData): str type 의 dictionary, list 를 python object 로 변환
+            - unicode 형식의 obj issue 를 해결하기 위해 사용 (prefix 'u')
+            - ex) "{u'id': u'asdf'}"
+        - json.dumps(): python 객체를 json 문자열 변환
+            - could_be_json object 가 python dictionary 형태일 경우를 고려
+            - ex) json format: null, false, true / dict: None, False, True etc...
+        -json.load(): json format data 를 python object 로 변환
+            - 이 과정에서 data 가 json format 에 적합하지 않다면 SyntaxError or ValueError 발생
+
+        :param jsonData: str type 의 could be json obj
+        :return: jsonData 가 json format 에 해당 : True or not False
+    """
     try:
-        json.loads(json.dumps(ast.literal_eval(jsonData)))
-    except SyntaxError:
-        return False
+        json.loads(jsonData)
     except ValueError:
-        return False
+        try:
+            json.loads(json.dumps(ast.literal_eval(jsonData)))
+        except ValueError:
+            return False
+        except SyntaxError:
+            return False
     return True
 
 
