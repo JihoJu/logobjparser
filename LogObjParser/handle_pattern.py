@@ -38,6 +38,12 @@ OPENSTACK_REGEX = re.compile(r"(<[\S\s]*>)+")  # openstack object: <nova.api.~>,
 LONG_DIGIT_REGEX = re.compile(r"[\d]+[L|l]+")  # suffix 'L': 0L, 23345L
 DATETIME_REGEX = re.compile(r"datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)")  # datetime object: datetime.datetime(~)
 
+""" STRIP REGEX """
+STRIP_REGEX = {"PATH": '<>()[]{}\"\',.:=\\n ', "URI": '()=:[]\'\", ', "IP": '-:\"\'[]()=@, '}
+STRIP_PATH = '<>()[]{}\"\',.:=\\n '
+STRIP_URI = '()=:[]\'\", '  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
+STRIP_IP = '-:\"\'[]()=@, '  # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
+
 
 def upload_grok_obj():
     """ Returns grok objects after converting them to a dict """
