@@ -1,8 +1,7 @@
-from collections import OrderedDict
-from LogObjParser.handle_pattern import upload_grok_obj, upload_sub_path_regex, upload_sub_ip_regex, \
-    SUBTRACT_TIME_GROK, upload_replace_exception_case_regex_in_json, OPENSTACK_GROK_IN_JSON, DATETIME_GROK_IN_JSON
 import ast
+from collections import OrderedDict
 import json
+import LogObjParser.pattern as pattern
 import xml.etree.ElementTree as ET
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
@@ -42,7 +41,7 @@ def get_all_objs(log: str, obj_type: str):
 
     return_obj_list = list()
     if obj_type != "XML":
-        regex_obj = upload_grok_obj()[obj_type].regex_obj
+        regex_obj = pattern.upload_grok_obj()[obj_type].regex_obj
 
     if obj_type == "TIME":
         is_objs = get_time_objs(log, regex_obj)
@@ -88,7 +87,7 @@ def get_time_objs(log: str, regex_obj):
         :return: log data 한 개에서 time obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
 
-    sub_log = SUBTRACT_TIME_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+    sub_log = pattern.SUBTRACT_TIME_GROK.regex_obj.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
 
     is_time_objs = regex_obj.findall(sub_log)
 
@@ -105,7 +104,7 @@ def get_path_objs(log: str, regex_obj):
         :return: log data 한 개에서 file path obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
 
-    sub_regex = upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
+    sub_regex = pattern.upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
     sub_log = log
     for regex in sub_regex.values():
@@ -134,7 +133,7 @@ def get_ip_objs(log: str, regex_obj):
         :return: log data 한 개에서 IP obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
 
-    sub_regex = upload_sub_ip_regex()  # 위의 주석의 경우와 URI 차례로 log data 에서 subtract 위한 regex 객체 (dict)
+    sub_regex = pattern.upload_sub_ip_regex()  # 위의 주석의 경우와 URI 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
     sub_log = log
     for regex in sub_regex.values():
@@ -227,13 +226,13 @@ def check_exception_case_in_json(json_obj: str):
         :param json_obj: str type 의 could be json obj
         :return json_obj: 특정 case 가 replace 된 json obj (예외 case 에 해당되는 경우)
     """
-    exception_regex = upload_replace_exception_case_regex_in_json()
+    exception_regex = pattern.upload_replace_exception_case_regex_in_json()
 
-    if OPENSTACK_GROK_IN_JSON.match(json_obj):
+    if pattern.OPENSTACK_GROK_IN_JSON.match(json_obj):
         exc_list = exception_regex["OPENSTACK_REGEX"].findall(json_obj)
         for exc in exc_list:
             json_obj = json_obj.replace(exc, '"' + exc + '"')
-    if DATETIME_GROK_IN_JSON.match(json_obj):
+    if pattern.DATETIME_GROK_IN_JSON.match(json_obj):
         exc_list = exception_regex["DATETIME_REGEX"].findall(json_obj)
         for exc in exc_list:
             json_obj = json_obj.replace(exc, '"' + exc + '"')
