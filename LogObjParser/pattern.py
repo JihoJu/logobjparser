@@ -2,16 +2,16 @@ import re
 from pygrok import Grok
 
 """ Grok Pattern """
-TIME_PATTERN = "(?<time>(?!<[0-9])%{HOUR}:%{MINUTE}[Z]|%{TIME:time}([+]([0-9]*))?[Z]?)"
-DATE_PATTERN = "(?<date>%{MONTHDAY}/%{MONTH}/%{YEAR}|%{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[T ]|%{DAY}([\S])? %{MONTHDAY} %{MONTH} %{YEAR}|%{MONTHDAY} %{MONTH} %{YEAR}|%{MONTH} %{YEAR}|%{YEAR} %{MONTH} %{MONTHDAY}|%{DAY} %{MONTH} %{MONTHDAY}|%{MONTH} %{MONTHDAY})"  # Custom Date pattern : 날짜 뒤 T 까지 추출
-URI_PATTERN = "(?<url>%{URI}|GET %{PATH}[\S]*|POST %{PATH}[\S]*|PUT %{PATH}[\S]*|DELETE %{PATH}[\S]*)"
-IP_PATTERN = "(?<ip>%{HOSTNAME}[/:]%{IPV4}([:](?:[0-9][0-9]*))?|[/]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[^-]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[-]%{IPV4}[-])"  # 마지막 pattern 은 수정이 필요 : =155.~~ -를 제외한 특수문자를 다 가져옴.
-PATH_PATTERN = "(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
-JSON_PATTERN = "(?<json>{(%{QUOTEDSTRING}[\s]?: [\w\W]*[,\s]*)*})"
+TIME_PATTERN = r"(?<time>(?!<[0-9])%{HOUR}:%{MINUTE}[Z]|%{TIME:time}([+]([0-9]*))?[Z]?)"
+DATE_PATTERN = r"(?<date>%{MONTHDAY}/%{MONTH}/%{YEAR}|%{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[T ]|%{DAY}([\S])? %{MONTHDAY} %{MONTH} %{YEAR}|%{MONTHDAY} %{MONTH} %{YEAR}|%{MONTH} %{YEAR}|%{YEAR} %{MONTH} %{MONTHDAY}|%{DAY} %{MONTH} %{MONTHDAY}|%{MONTH} %{MONTHDAY})"  # Custom Date pattern : 날짜 뒤 T 까지 추출
+URI_PATTERN = r"(?<url>%{URI}|GET %{PATH}[\S]*|POST %{PATH}[\S]*|PUT %{PATH}[\S]*|DELETE %{PATH}[\S]*)"
+IP_PATTERN = r"(?<ip>%{HOSTNAME}[/:]%{IPV4}([:](?:[0-9][0-9]*))?|[/]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[^-]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[-]%{IPV4}[-])"  # 마지막 pattern 은 수정이 필요 : =155.~~ -를 제외한 특수문자를 다 가져옴.
+PATH_PATTERN = r"(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
+JSON_PATTERN = r"(?<json>{(%{QUOTEDSTRING}[\s]?: [\w\W]*[,\s]*)*})"
 
 """ Grok Pattern for Json Exception Case """
-OPENSTACK_PATTERN_IN_JSON = "(?<json>(%{QUOTEDSTRING}: (<[\S\s]*>)+)+)"  # "key": <KeyStone~~>
-DATETIME_PATTERN_IN_JSON = "(?<json>(%{QUOTEDSTRING}: datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)))"  # "key": datetime.~
+OPENSTACK_PATTERN_IN_JSON = r"(?<json>(%{QUOTEDSTRING}: (<[\S\s]*>)+)+)"  # "key": <KeyStone~~>
+DATETIME_PATTERN_IN_JSON = r"(?<json>(%{QUOTEDSTRING}: datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)))"  # "key": datetime.~
 
 TIME_GROK = Grok(TIME_PATTERN)
 DATE_GROK = Grok(DATE_PATTERN)
@@ -23,14 +23,14 @@ OPENSTACK_GROK_IN_JSON = Grok(OPENSTACK_PATTERN_IN_JSON)
 DATETIME_GROK_IN_JSON = Grok(DATETIME_PATTERN_IN_JSON)
 
 """ Time Regrex Pattern for validation """
-SUBTRACT_TIME_PATTERN = "(?<sub_time>0{3,}:0{2,}:|0{3,}:|%{MAC}([:]\d*)*)"
+SUBTRACT_TIME_PATTERN = r"(?<sub_time>0{3,}:0{2,}:|0{3,}:|%{MAC}([:]\d*)*)"
 SUBTRACT_TIME_GROK = Grok(SUBTRACT_TIME_PATTERN)
 
 """ IP Regrex Pattern for validation """
-SUBTRACT_IP_REGEX = re.compile(r'\\n')
+SUBTRACT_IP_REGEX = re.compile(r'\n')
 
 """ File Path Regrex Pattern for validation """
-SUBTRACT_PATH_PATTERN = "(?<sub_path>( [^/ ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
+SUBTRACT_PATH_PATTERN = r"(?<sub_path>( [^/ ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
 SUBTRACT_PATH_GROK = Grok(SUBTRACT_PATH_PATTERN)
 
 """ Exception Regrex Pattern for Json Validation """
