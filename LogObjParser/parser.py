@@ -9,74 +9,33 @@ TYPE_OBJ = ["TIME", "DATE", "URI", "IP", "PATH", "JSON", "XML"]
 
 
 def parse_log_data(log: str):
-    """
-    로그 data 한 줄을 입력 시
-    - "TIME", "DATE", "URI", "IP", "PATH" 등
-    각 type 에 해당 obj 들을 identifying 후 json 형식 표현을 위해 dict data structure 에 저장
+    """ Recognize each type obj for single-line entry of a log data
+
+        로그 data 한 줄을 입력 시
+        Type: "TIME", "DATE", "URI", "IP", "PATH", "JSON", "well-defined XML"
+        위에 해당 type obj 를 identifying 후 json 형식 표현을 위해 dictionary data structure 에 저장
 
         :param log: log data 한 줄, type: str
-        :return: "TIME", "DATE", "URI", "IP", "PATH" 각 type 이 key 값으로 가지고 인식된 obj 를 가지고 있는 Orderdict 객체
+        :return: 각 type 이 key 값, 인식된 obj 를 값으로 가지고 있는 Orderdict 객체
     """
 
     return_data = OrderedDict()
 
     return_data["LOG"] = log
-
-    # TIME ~ PATH 돌면서 추출된 각 obj 들을 dict 구조에 저장
-    for obj in TYPE_OBJ:
-        recognized_objs = get_all_objs(log, obj)
-        return_data[obj] = recognized_objs
+    return_data["TIME"] = get_time_objs(log, pattern.TIME_GROK.regex_obj)
+    return_data["DATE"] = get_date_objs(log, pattern.DATE_GROK.regex_obj)
+    return_data["URI"] = get_uri_objs(log, pattern.URI_GROK.regex_obj)
+    return_data["IP"] = get_ip_objs(log, pattern.IP_GROK.regex_obj)
+    return_data["PATH"] = get_path_objs(log, pattern.PATH_GROK.regex_obj)
+    return_data["JSON"] = get_json_objs(log)
+    return_data["XML"] = get_xml_objs(log)
 
     return return_data
 
 
-def get_all_objs(log: str, obj_type: str):
-    """
-        각 obj_type regrex pattern 을 log 한 줄을 findall 하여 리턴
-
-        :param log: log data 한 줄, type: str
-        :param obj_type: 이미 생성한 grok pattern 을 구별을 위함
-        :return: log 한 줄에 해당 regrex findall 리스트
-    """
-
-    return_obj_list = list()
-    if obj_type != "XML":
-        regex_obj = pattern.upload_grok_obj()[obj_type].regex_obj
-
-    if obj_type == "TIME":
-        is_objs = get_time_objs(log, regex_obj)
-    elif obj_type == "IP":
-        is_objs = get_ip_objs(log, regex_obj)
-    elif obj_type == "PATH":
-        is_objs = get_path_objs(log, regex_obj)
-    elif obj_type == "JSON":
-        is_objs = get_json_objs(log)
-        return is_objs
-    elif obj_type == "XML":
-        is_objs = get_xml_objs(log)
-        return is_objs
-    else:
-        is_objs = regex_obj.findall(log)
-
-    for is_obj in is_objs:
-        if obj_type == "PATH":
-            # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
-            is_path = is_obj[0].strip('<>()[]{}\"\',.:=\\n ')
-            return_obj_list.append(is_path)
-        elif obj_type == "URI":
-            is_uri = is_obj[0].strip('()=:[]\'\", ')  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
-            return_obj_list.append(is_uri)
-        elif obj_type == "IP":
-            is_ip = is_obj[0].strip('-:\"\'[]()=@, ')  # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
-            return_obj_list.append(is_ip)
-        else:
-            return_obj_list.append(is_obj[0].strip())
-
-    return return_obj_list
-
-
 def get_time_objs(log: str, regex_obj):
-    """
+    """ Identify TIME obj from a log data
+
         Time obj 가 아닌 정보를 인식 문제를 해결 위한 함수로 3개에 해당 obj 를 subtract from a log data
         - {"address": "0000:00:06.2} -> "TIME": '00:00:06.2'
         - is set to 000:00:00:00.000 -> "TIME": '00:00:00:00'
@@ -91,11 +50,55 @@ def get_time_objs(log: str, regex_obj):
 
     is_time_objs = regex_obj.findall(sub_log)
 
+    if is_time_objs:
+        parsed_time_objs = list()
+        for obj in is_time_objs:
+            parsed_time_objs.append(obj[0].strip())
+        return parsed_time_objs
+
     return is_time_objs
 
 
-def get_path_objs(log: str, regex_obj):
+def get_date_objs(log: str, regex_obj):
+    """ Identify DATE objs from a log data
+
+        :param log: log data 한 줄, type: str
+        :param regex_obj: Date grok pattern 을 regrex 객체로 변환한 re 객체
+        :return: log data 한 개에서 date obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
+    is_date_objs = regex_obj.findall(log)
+
+    if is_date_objs:
+        parsed_date_objs = list()
+        for obj in is_date_objs:
+            parsed_date_objs.append(obj[0].strip())
+        return parsed_date_objs
+
+    return is_date_objs
+
+
+def get_uri_objs(log: str, regex_obj):
+    """ Identify URI objs from a log data
+
+        :param log: log data 한 줄, type: str
+        :param regex_obj: URI grok pattern 을 regrex 객체로 변환한 re 객체
+        :return: log data 한 개에서 URI obj 를 findall 로 인식한 리스트 안 튜플 data structure
+    """
+    is_uri_objs = regex_obj.findall(log)
+
+    if is_uri_objs:
+        parsed_uri_objs = list()
+        for obj in is_uri_objs:
+            # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
+            parsed_uri_objs.append(obj[0].strip(pattern.STRIP_URI))
+        return parsed_uri_objs
+
+    return is_uri_objs
+
+
+def get_path_objs(log: str, regex_obj):
+    """ Identify File Path obj from a log data
+
         File Path obj 가 아닌 obj 인식 문제를 해결 위한 함수로 아래 경우에 해당 obj 를 subtract from a log data
         - 3 ops, 0%/0% of on/off-heap limit -> 'PATH': '/0%'
 
@@ -106,17 +109,25 @@ def get_path_objs(log: str, regex_obj):
 
     sub_regex = pattern.upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
-    sub_log = log
+    # file path obj 추출 전 URI, IP, 미리 제거 sub_path obj 제거
     for regex in sub_regex.values():
-        sub_log = regex.sub(SUB_SIGN, sub_log)  # log data 에서 subtract 할 regex pattern 객체
+        log = regex.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
 
-    is_path_objs = regex_obj.findall(sub_log)
+    is_path_objs = regex_obj.findall(log)
+
+    if is_path_objs:
+        parsed_path_objs = list()
+        for obj in is_path_objs:
+            # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
+            parsed_path_objs.append(obj[0].strip(pattern.STRIP_PATH))
+        return parsed_path_objs
 
     return is_path_objs
 
 
 def get_ip_objs(log: str, regex_obj):
-    """
+    """ Identify IP obj from a log data
+
         IP obj 가 Overlapping 되는 경우
             - 'http://192.168.122.122:9292/v1/images/53664ce3-7125-48c1-974e-eceb6f69d912#012x-image-meta-min_ram:'
             - 'URI': 'http://192.168.122.122:9292/v1/images/53664ce3-7125-48c1-974e-eceb6f69d912#012x-image-meta-min_ram:'
@@ -135,11 +146,18 @@ def get_ip_objs(log: str, regex_obj):
 
     sub_regex = pattern.upload_sub_ip_regex()  # 위의 주석의 경우와 URI 차례로 log data 에서 subtract 위한 regex 객체 (dict)
 
-    sub_log = log
+    # ip obj 추출 전 \n, uri obj 제거
     for regex in sub_regex.values():
-        sub_log = regex.sub(SUB_SIGN, sub_log)
+        log = regex.sub(SUB_SIGN, log)
 
-    is_ip_objs = regex_obj.findall(sub_log)
+    is_ip_objs = regex_obj.findall(log)
+
+    if is_ip_objs:
+        parsed_ip_objs = list()
+        for obj in is_ip_objs:
+            # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
+            parsed_ip_objs.append(obj[0].strip(pattern.STRIP_IP))
+        return parsed_ip_objs
 
     return is_ip_objs
 
@@ -172,7 +190,8 @@ def validateJSON(jsonData: str):
 
 
 def get_could_be_json(log: str):
-    """
+    """ Extract could be json obj from a log data
+
         설명: log data 를 input 으로 log 한 줄 내에 있는 json 형식일 수도 있는 obj 들을 모두 모아 리턴
         json 형식일 수도 있다는 것의 기준: { 와 } 가 개수가 맞을 경우 -> Parenthesis 가 valid 한 경우를 json 형식 이라 가정
 
@@ -245,7 +264,8 @@ def check_exception_case_in_json(json_obj: str):
 
 
 def get_json_objs(log: str):
-    """
+    """ Identify JSON obj from a log data
+
         obj.replace('\'', '\"'):
             - log data 에서 valid 한 json 형식이 아니지만 json 형식으로 써놓은 것들이 있다.
             - valid => {"log": data}
@@ -267,7 +287,7 @@ def get_json_objs(log: str):
     return is_json_objs
 
 
-def is_validate_xml(xml: str):
+def validateXML(xml: str):
     """ Check if obj that could be xml is valid
 
         :param xml: string obj could be xml
@@ -325,16 +345,16 @@ def get_could_xml_objs(log: str):
 
 
 def get_xml_objs(log: str):
-    """ Extract XML object from log data
+    """ Identify well-defined XML obj from a log data
 
-    :param log: A log data
-    :return xml_obj: xml objects
+        :param log: A log data
+        :return xml_obj: xml objects
     """
-    xml_obj = list()
+    is_xml_obj = list()
 
     is_xml = get_could_xml_objs(log)
     for xml in is_xml:
-        if is_validate_xml(xml):
-            xml_obj.append(xml)
+        if validateXML(xml):
+            is_xml_obj.append(xml)
 
-    return xml_obj
+    return is_xml_obj
