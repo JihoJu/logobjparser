@@ -17,8 +17,8 @@ TIME_GROK = Grok(TIME_PATTERN)
 DATE_GROK = Grok(DATE_PATTERN)
 URI_GROK = Grok(URI_PATTERN)
 IP_GROK = Grok(IP_PATTERN)
-PATH_PATTERN = Grok(PATH_PATTERN)
-JSON_PATTERN = Grok(JSON_PATTERN)
+PATH_GROK = Grok(PATH_PATTERN)
+JSON_GROK = Grok(JSON_PATTERN)
 OPENSTACK_GROK_IN_JSON = Grok(OPENSTACK_PATTERN_IN_JSON)
 DATETIME_GROK_IN_JSON = Grok(DATETIME_PATTERN_IN_JSON)
 
@@ -54,8 +54,8 @@ def upload_grok_obj():
     collection_grok["DATE"] = DATE_GROK
     collection_grok["URI"] = URI_GROK
     collection_grok["IP"] = IP_GROK
-    collection_grok["PATH"] = PATH_PATTERN
-    collection_grok["JSON"] = JSON_PATTERN
+    collection_grok["PATH"] = PATH_GROK
+    collection_grok["JSON"] = JSON_GROK
 
     return collection_grok
 
