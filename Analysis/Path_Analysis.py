@@ -8,19 +8,21 @@ class Path_Analysis:
     def __init__(self):
         self.result = list()
 
-    def run(self):
-        self.extract_log_from_dir("../logdata")
+    def run(self, path):
+        self.extract_log_from_dir(path)
         self.identify_existing_file_path_pattern()
         self.identify_custom_file_path_pattern()
         self.compare_result()
-        hf.output_obj_to_csv(self.result, "../result/analysis/")
+        hf.output_obj_to_csv(self.result, "./result/analysis/")
+
+        return 0
 
     def extract_log_from_dir(self, in_dir: str):
         self.result.append(["Where", "Log", "Existing", "Custom"])
         files = hf.get_filenames(in_dir)
         for file in files:
             log_file = open(f"{in_dir}/{file}", "rt")
-            log_lines = log_file.readlines()[:5000]
+            log_lines = log_file.readlines()[:20000]
             for log in log_lines:
                 self.result.append([file, log])
 
@@ -44,7 +46,3 @@ class Path_Analysis:
         for data in self.result[1:].copy():
             if data[2] == data[3]:
                 self.result.remove(data)
-
-
-path_analysis = Path_Analysis()
-path_analysis.run()
