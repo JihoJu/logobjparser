@@ -12,6 +12,7 @@ class Path_Analysis:
         self.extract_log_from_dir("../logdata")
         self.identify_existing_file_path_pattern()
         self.identify_custom_file_path_pattern()
+        self.compare_result()
         hf.output_obj_to_csv(self.result, "../result/analysis/")
 
     def extract_log_from_dir(self, in_dir: str):
@@ -19,7 +20,7 @@ class Path_Analysis:
         files = hf.get_filenames(in_dir)
         for file in files:
             log_file = open(f"{in_dir}/{file}", "rt")
-            log_lines = log_file.readlines()[:10]
+            log_lines = log_file.readlines()[:5000]
             for log in log_lines:
                 self.result.append([file, log])
 
@@ -38,6 +39,11 @@ class Path_Analysis:
         for log in self.result[1:]:
             is_path_objs = get_path_objs(log[1], PATH_GROK.regex_obj)
             log.extend([is_path_objs])
+
+    def compare_result(self):
+        for data in self.result[1:].copy():
+            if data[2] == data[3]:
+                self.result.remove(data)
 
 
 path_analysis = Path_Analysis()
