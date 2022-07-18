@@ -7,7 +7,6 @@ DATE_PATTERN = r"(?<date>%{MONTHDAY}/%{MONTH}/%{YEAR}|%{YEAR}[/-]%{MONTHNUM}[/-]
 URI_PATTERN = r"(?<url>%{URI}|GET %{PATH}[\S]*|POST %{PATH}[\S]*|PUT %{PATH}[\S]*|DELETE %{PATH}[\S]*)"
 IP_PATTERN = r"(?<ip>%{HOSTNAME}[/:]%{IPV4}([:](?:[0-9][0-9]*))?|[/]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[^-]%{IPV4}([:](?:[0-9][0-9]*))?(/\d{2})?|[-]%{IPV4}[-])"  # 마지막 pattern 은 수정이 필요 : =155.~~ -를 제외한 특수문자를 다 가져옴.
 PATH_PATTERN = r"(?<path>[^A-Za-z0-9]%{PATH}[\S]+)"
-JSON_PATTERN = r"(?<json>{(%{QUOTEDSTRING}[\s]?: [\w\W]*[,\s]*)*})"
 
 """ Grok Pattern for Json Exception Case """
 OPENSTACK_PATTERN_IN_JSON = r"(?<json>(%{QUOTEDSTRING}: (<[\S\s]*>)+)+)"  # "key": <KeyStone~~>
@@ -18,7 +17,6 @@ DATE_GROK = Grok(DATE_PATTERN)
 URI_GROK = Grok(URI_PATTERN)
 IP_GROK = Grok(IP_PATTERN)
 PATH_GROK = Grok(PATH_PATTERN)
-JSON_GROK = Grok(JSON_PATTERN)
 OPENSTACK_GROK_IN_JSON = Grok(OPENSTACK_PATTERN_IN_JSON)
 DATETIME_GROK_IN_JSON = Grok(DATETIME_PATTERN_IN_JSON)
 
@@ -39,25 +37,9 @@ LONG_DIGIT_REGEX = re.compile(r"[\d]+[L|l]+")  # suffix 'L': 0L, 23345L
 DATETIME_REGEX = re.compile(r"datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)")  # datetime object: datetime.datetime(~)
 
 """ STRIP REGEX """
-STRIP_REGEX = {"PATH": '<>()[]{}\"\',.:=\\n ', "URI": '()=:[]\'\", ', "IP": '-:\"\'[]()=@, '}
 STRIP_PATH = '<>()[]{}\"\'`,.:;=\n '
 STRIP_URI = '()=:[]\'\", '  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
 STRIP_IP = '-:\"\'[]()=@, '  # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
-
-
-def upload_grok_obj():
-    """ Returns grok objects after converting them to a dict """
-
-    collection_grok = dict()
-
-    collection_grok["TIME"] = TIME_GROK
-    collection_grok["DATE"] = DATE_GROK
-    collection_grok["URI"] = URI_GROK
-    collection_grok["IP"] = IP_GROK
-    collection_grok["PATH"] = PATH_GROK
-    collection_grok["JSON"] = JSON_GROK
-
-    return collection_grok
 
 
 def upload_sub_ip_regex():
