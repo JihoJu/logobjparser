@@ -30,7 +30,7 @@ SUBTRACT_TIME_GROK = Grok(SUBTRACT_TIME_PATTERN)
 SUBTRACT_IP_REGEX = re.compile(r'\n')
 
 """ File Path Regrex Pattern for validation """
-SUBTRACT_PATH_PATTERN = r"(?<sub_path>( [^/ ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
+SUBTRACT_PATH_PATTERN = r"(?<sub_path>( [^/` ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
 SUBTRACT_PATH_GROK = Grok(SUBTRACT_PATH_PATTERN)
 
 """ Exception Regrex Pattern for Json Validation """
@@ -40,7 +40,7 @@ DATETIME_REGEX = re.compile(r"datetime.[A-Za-z]+\([A-Za-z0-9 ,]*\)")  # datetime
 
 """ STRIP REGEX """
 STRIP_REGEX = {"PATH": '<>()[]{}\"\',.:=\\n ', "URI": '()=:[]\'\", ', "IP": '-:\"\'[]()=@, '}
-STRIP_PATH = '<>()[]{}\"\',.:;=\\n '
+STRIP_PATH = '<>()[]{}\"\'`,.:;=\n '
 STRIP_URI = '()=:[]\'\", '  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
 STRIP_IP = '-:\"\'[]()=@, '  # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
 
