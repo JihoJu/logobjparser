@@ -1,8 +1,43 @@
 import os
+import re
 from pygrok import Grok
 import LogObjParser.handle_file as hf
-from LogObjParser.pattern import PATH_GROK
+from LogObjParser.pattern import PATH_GROK, DATE_GROK, upload_sub_path_regex, STRIP_PATH
 from LogObjParser.parser import get_path_objs
+
+SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
+SUBTRACT_PATH = re.compile(
+    r"(\s([-=+,%#\?:\^.@*\"※~ㆍ!』\|\(\)\[\]…》·\w]+/[\w]+){1}[-=+,%#\?:\^.@*\"※~ㆍ!』‘\|\(\)\[\]`\'…》\”\“\’·|\s])|</\w*>|/>{1}|N/A"
+)
+
+
+def get_path_objs_for_analyzing(log: str, regex_obj):
+    """
+        기존에 구현한 path 인식 알고리즘과 분석을 하기 위한 함수
+
+        무엇을?
+        - path 인식 전 file path 가 아닌 객체 pattern 수정
+        - SUBTRACT_PATH, DATE PATTERN 제거
+    """
+    sub_regex = upload_sub_path_regex()
+
+    sub_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH
+    sub_regex["DATE"] = DATE_GROK.regex_obj
+
+    # file path obj 추출 전 URI, IP, 미리 제거 sub_path obj 제거
+    for regex in sub_regex.values():
+        log = regex.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+
+    is_path_objs = regex_obj.findall(log)
+
+    if is_path_objs:
+        parsed_path_objs = list()
+        for obj in is_path_objs:
+            # findall 로 리턴된 튜플 안에서 0번째 path 선택 & file path 처음 및 마지막 필요 없는 str obj 제거
+            parsed_path_objs.append(obj[0].strip(STRIP_PATH))
+        return parsed_path_objs
+
+    return is_path_objs
 
 
 class Path_Analysis:
@@ -11,8 +46,9 @@ class Path_Analysis:
 
     def run(self, path):
         self.extract_log_from_path(path)
-        self.identify_existing_file_path_pattern()
+        # self.identify_existing_file_path_pattern()
         self.identify_custom_file_path_pattern()
+        self.identify_custom_file_path_pattern_for_analyzing()
         self.compare_result()
         hf.output_obj_to_csv(self.result, "./result/analysis/")
 
@@ -34,7 +70,7 @@ class Path_Analysis:
         """
             Extract from a file to log data str object
         """
-        self.result.append(["Where", "Log", "Existing", "Custom"])
+        self.result.append(["Where", "Log", "Existing", "New"])
 
         log_file = open(f"{in_file}", "rt")
         log_lines = log_file.readlines()
@@ -46,7 +82,7 @@ class Path_Analysis:
             Extract from files in the directory path to log data str object
         """
 
-        self.result.append(["Where", "Log", "Existing", "Custom"])
+        self.result.append(["Where", "Log", "Existing", "New"])
         files = hf.get_filenames(in_dir)
         for file in files:
             log_file = open(f"{in_dir}/{file}", "rt")
@@ -68,6 +104,11 @@ class Path_Analysis:
     def identify_custom_file_path_pattern(self):
         for log in self.result[1:]:
             is_path_objs = get_path_objs(log[1], PATH_GROK.regex_obj)
+            log.extend([is_path_objs])
+
+    def identify_custom_file_path_pattern_for_analyzing(self):
+        for log in self.result[1:]:
+            is_path_objs = get_path_objs_for_analyzing(log[1], PATH_GROK.regex_obj)
             log.extend([is_path_objs])
 
     def compare_result(self):
