@@ -41,6 +41,11 @@ STRIP_PATH = '<>()[]{}\"\'`,.:;=\n '
 STRIP_URI = '()=:[]\'\", '  # URI 의 경우 string 처음 or 마지막 :, ", =, ', [, ], (, ), , 제거
 STRIP_IP = '-:\"\'[]()=@, '  # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
 
+""" MIME-Type REGEX """
+MIMETYPE_REGEX = re.compile(
+    r"([^/]((text|image|audio|video|application|\*)/(aac|x-abiword|octet-stream|x-msvideo|vnd.amazon.ebook|x-bzip2?|x-csh|css|csv|msword|epub\+zip|gif|html|x-icon|calendar|java-archive|json|midi|jpeg|javascript|mpeg|vnd\.apple\.installer\+xml|vnd\.oasis\.opendocument\.presentation|vnd\.oasis\.opendocument\.spreadsheet|vnd\.oasis\.opendocument\.text|ogg|pdf|vnd\.ms-powerpoint|x-rar-compressed|rtf|x-sh|svg\+xml|x-shockwave-flash|x-tar|tiff|x-front-ttf|vnd\.visio|x-wav|webm|webp|x-font-woff|xhtml\+tml|vnd\.ms-excel|vnd\.mozilla\.xul\+xml|zip|3gpp2?|x-7z-compressed|\*)){1})[^/]"
+)
+
 
 def upload_sub_ip_regex():
     """
