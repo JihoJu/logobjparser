@@ -2,7 +2,7 @@ import os
 import re
 from pygrok import Grok
 import LogObjParser.handle_file as hf
-from LogObjParser.pattern import PATH_GROK, DATE_GROK, upload_sub_path_regex, STRIP_PATH
+from LogObjParser.pattern import PATH_GROK, DATE_GROK, upload_sub_path_regex, STRIP_PATH, MIMETYPE_REGEX
 from LogObjParser.parser import get_path_objs
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
@@ -47,9 +47,10 @@ class Path_Analysis:
     def run(self, path):
         self.extract_log_from_path(path)
         # self.identify_existing_file_path_pattern()
-        self.identify_custom_file_path_pattern()
-        self.identify_custom_file_path_pattern_for_analyzing()
-        self.compare_result()
+        # self.identify_custom_file_path_pattern()
+        # self.identify_custom_file_path_pattern_for_analyzing()
+        # self.compare_result()
+        self.identify_mime_type()
         hf.output_obj_to_csv(self.result, "./result/analysis/")
 
         return 0
@@ -110,6 +111,15 @@ class Path_Analysis:
         for log in self.result[1:]:
             is_path_objs = get_path_objs_for_analyzing(log[1], PATH_GROK.regex_obj)
             log.extend([is_path_objs])
+
+    def identify_mime_type(self):
+        for log in self.result[1:].copy():
+            is_mime_objs = MIMETYPE_REGEX.findall(log[1])
+            if is_mime_objs:
+                is_mime_objs = [mime_obj[0] for mime_obj in is_mime_objs]
+                log.extend([is_mime_objs])
+            else:
+                self.result.remove(log)
 
     def compare_result(self):
         for data in self.result[1:].copy():
