@@ -69,6 +69,7 @@ def upload_sub_path_regex():
 
     collection_regex = dict()
 
+    collection_regex["MIME_TYPE"] = MIMETYPE_REGEX
     collection_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH_GROK.regex_obj
     collection_regex["URI_REGEX"] = URI_GROK.regex_obj
     collection_regex["IP_REGEX"] = IP_GROK.regex_obj
