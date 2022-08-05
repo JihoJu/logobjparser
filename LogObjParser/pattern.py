@@ -26,6 +26,7 @@ SUBTRACT_TIME_GROK = Grok(SUBTRACT_TIME_PATTERN)
 
 """ IP Regrex Pattern for validation """
 SUBTRACT_IP_REGEX = re.compile(r'\\n')
+SUBTRACT_IPV6_REGEX = re.compile(r"[A-Za-z0-9]{0,4}::[A-Za-z0-9]{0,4}")
 
 """ File Path Regrex Pattern for validation """
 SUBTRACT_PATH_PATTERN = r"(?<sub_path>( [^/` ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
