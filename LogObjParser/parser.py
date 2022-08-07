@@ -155,6 +155,10 @@ def get_ip_objs(log: str, regex_obj):
     if is_ip_objs:
         parsed_ip_objs = list()
         for obj in is_ip_objs:
+            if obj[0] == '::':  # '::' 만 인식 case 제거
+                continue
+            if pattern.SUBTRACT_IPV6_REGEX.fullmatch(obj[0]):   # abca::abcf -> 'abca::abcf' 인식 case 제거
+                continue
             # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
             parsed_ip_objs.append(obj[0].strip(pattern.STRIP_IP))
         return parsed_ip_objs
