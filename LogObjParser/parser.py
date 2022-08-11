@@ -107,9 +107,15 @@ def get_path_objs(log: str, regex_obj):
         :return: log data 한 개에서 file path obj 를 findall 로 인식한 리스트 안 튜플 data structure
     """
 
-    sub_regex = pattern.upload_sub_path_regex()  # 위의 주석의 경우와 URI, IP 차례로 log data 에서 subtract 위한 regex 객체 (dict)
+    # 위의 주석의 경우와 URI, sub_path 차례로 log data 에서 subtract 위한 regex 객체 (dict)
+    sub_regex = pattern.upload_sub_path_regex()
 
-    # file path obj 추출 전 URI, IP, 미리 제거 sub_path obj 제거
+    # file path obj 인식 전 get_ip_objs 함수가 인식한 ip objs 를 log 에서 subtract
+    sub_ip_objs = get_ip_objs(log, pattern.IP_GROK.regex_obj)
+    for obj in sub_ip_objs:
+        log = log.replace(obj, SUB_SIGN)
+
+    # file path obj 추출 전 URI, sub_path obj 제거
     for regex in sub_regex.values():
         log = regex.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
 
@@ -155,6 +161,10 @@ def get_ip_objs(log: str, regex_obj):
     if is_ip_objs:
         parsed_ip_objs = list()
         for obj in is_ip_objs:
+            if obj[0] == '::':  # '::' 만 인식 case 제거
+                continue
+            if pattern.SUBTRACT_IPV6_REGEX.fullmatch(obj[0]):   # abca::abcf -> 'abca::abcf' 인식 case 제거
+                continue
             # IP 의 경우 string 처음 or 마지막 -, :, ", =, ', [, ], (, ), @, , 제거
             parsed_ip_objs.append(obj[0].strip(pattern.STRIP_IP))
         return parsed_ip_objs

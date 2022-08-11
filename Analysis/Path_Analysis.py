@@ -2,8 +2,8 @@ import os
 import re
 from pygrok import Grok
 import LogObjParser.handle_file as hf
-from LogObjParser.pattern import PATH_GROK, DATE_GROK, upload_sub_path_regex, STRIP_PATH, MIMETYPE_REGEX
-from LogObjParser.parser import get_path_objs
+from LogObjParser.pattern import PATH_GROK, DATE_GROK, upload_sub_path_regex, STRIP_PATH, MIMETYPE_REGEX, IP_GROK
+from LogObjParser.parser import get_path_objs, get_ip_objs
 
 SUB_SIGN = "   #spec#   "  # 각 obj 를 인식 후 해당 obj 자리 제거를 위한 string
 SUBTRACT_PATH = re.compile(
@@ -24,11 +24,20 @@ def get_path_objs_for_analyzing(log: str, regex_obj):
     sub_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH
     sub_regex["DATE"] = DATE_GROK.regex_obj
 
+    # ip pattern 만으로 ip obj 를 subtract 하는게 아닌 get_ip_objs 함수로 걸러진 ip obj 를 subtract
+    # => 정확도 상승을 위해
+    del sub_regex["IP_REGEX"]
+    is_ip_objs = get_ip_objs(log, IP_GROK.regex_obj)
+    sub_log = log
+    if is_ip_objs:
+        for ip_obj in is_ip_objs:
+            sub_log = sub_log.replace(ip_obj, SUB_SIGN)
+
     # file path obj 추출 전 URI, IP, 미리 제거 sub_path obj 제거
     for regex in sub_regex.values():
-        log = regex.sub(SUB_SIGN, log)  # log data 에서 subtract 할 regex pattern 객체
+        sub_log = regex.sub(SUB_SIGN, sub_log)  # log data 에서 subtract 할 regex pattern 객체
 
-    is_path_objs = regex_obj.findall(log)
+    is_path_objs = regex_obj.findall(sub_log)
 
     if is_path_objs:
         parsed_path_objs = list()
@@ -46,11 +55,9 @@ class Path_Analysis:
 
     def run(self, path):
         self.extract_log_from_path(path)
-        # self.identify_existing_file_path_pattern()
-        # self.identify_custom_file_path_pattern()
-        # self.identify_custom_file_path_pattern_for_analyzing()
-        # self.compare_result()
-        self.identify_mime_type()
+        self.identify_custom_file_path_pattern()
+        self.identify_custom_file_path_pattern_for_analyzing()
+        self.compare_result()
         hf.output_obj_to_csv(self.result, "./result/analysis/")
 
         return 0
@@ -118,6 +125,14 @@ class Path_Analysis:
             if is_mime_objs:
                 is_mime_objs = [mime_obj[0] for mime_obj in is_mime_objs]
                 log.extend([is_mime_objs])
+            else:
+                self.result.remove(log)
+
+    def identify_ip_obj(self):
+        for log in self.result[1:].copy():
+            is_ip_objs = get_ip_objs(log[1], IP_GROK.regex_obj)
+            if is_ip_objs:
+                log.extend([is_ip_objs])
             else:
                 self.result.remove(log)
 
