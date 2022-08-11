@@ -29,8 +29,9 @@ SUBTRACT_IP_REGEX = re.compile(r'\\n')
 SUBTRACT_IPV6_REGEX = re.compile(r"[A-Za-z0-9]{0,4}::[A-Za-z0-9]{0,4}")
 
 """ File Path Regrex Pattern for validation """
-SUBTRACT_PATH_PATTERN = r"(?<sub_path>( [^/` ]+/[^/ ]+ ){1}|</\w*>|/>{1})"
-SUBTRACT_PATH_GROK = Grok(SUBTRACT_PATH_PATTERN)
+SUBTRACT_PATH_REGEX = re.compile(
+    r"(\s(\w[-=+,%#\?:\^.@*\'\"※~ㆍ!』\|\(\)\[\]…》·]?/[\w]+){1}[-=+,%#\?:\^.@*\"※~ㆍ!』‘\|\(\)\[\]`\'…》\”\“\’·|\s])|</\w*>|/>{1}|N/A"
+)
 
 """ Exception Regrex Pattern for Json Validation """
 OPENSTACK_REGEX = re.compile(r"(<[\S\s]*>)+")  # openstack object: <nova.api.~>, <KeyStone~>
@@ -71,7 +72,7 @@ def upload_sub_path_regex():
     collection_regex = dict()
 
     collection_regex["MIME_TYPE"] = MIMETYPE_REGEX
-    collection_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH_GROK.regex_obj
+    collection_regex["SUBTRACT_PATH_REGEX"] = SUBTRACT_PATH_REGEX
     collection_regex["URI_REGEX"] = URI_GROK.regex_obj
 
     return collection_regex
