@@ -47,17 +47,11 @@ File path obj 가 아닌 객체로 인식 정확도가 매우 낮아졌다.
 - ['+/flWYCyX02GHMpE3zatYeOU8K6RVVBmfKHvs+nl/xSw+Pc91rCKw+2/vNv2j56rWbE6Zr0Ig1YhEms7ci4o+SvaAFWUEjWlW82Yg0YFIDBp1yI0lDcrkXAt9MY6O035TpBrlzb//oUwNa2YlIhxv5HvrvlJQG+XZY/w7GZYgZ2z1oafIBd8FwPm+ZDA4ZK5m8rCAy477jB/', "/dev/vda',root_gb=1,security_groups=<?>,services=<?>,shutdown_terminate=False,system_metadata=<?>,tags=<?>,task_state=None,terminated_at=None,trusted_certs=<?>,updated_at=2019-07-31T08:46:22Z,user_data=None,user_id='3ef4e5dd63784f898967ce004a2760d0',uuid=2d4c489e-83f6-40e4-b7cc-cfb12692bbf9,vcpu_model=<?>,vcpus=1,vm_mode=None,vm_state='active"]
 - ['+/flWYCyX02GHMpE3zatYeOU8K6RVVBmfKHvs+nl/xSw+Pc91rCKw+2/vNv2j56rWbE6Zr0Ig1YhEms7ci4o+SvaAFWUEjWlW82Yg0YFIDBp1yI0lDcrkXAt9MY6O035TpBrlzb//oUwNa2YlIhxv5HvrvlJQG+XZY/w7GZYgZ2z1oafIBd8FwPm+ZDA4ZK5m8rCAy477jB/', "/dev/vda',root_gb=1,security_groups=<?>,services=<?>,shutdown_terminate=False,system_metadata=<?>,tags=<?>,task_state=None,terminated_at=None,trusted_certs=<?>,updated_at"]
 
-7. DEBUG glance.api.middleware.version_negotiation [None req-6e2682d5-3d9f-4625-8c9c-e11bbc815796 demo admin] Determining version of request: GET /v2/images Accept: */* {{(pid=1308) process_request /opt/stack/glance/glance/api/middleware/version_negotiation.py:45}}
-- ['/opt/stack/glance/glance/api/middleware/version_negotiation.py:45']
-- ['*/*', '/opt/stack/glance/glance/api/middleware/version_negotiation.py:45']   
-=> * / * : MIME Type (클라이언트에게 전송된 문서의 다양성을 알려주기 위한 메커니즘)   
-=> MIME-Type 은 규칙이 정해져 있으니 Pattern 으로 만들어보는 방법도 좋을 거 같다!!!
-
-8. DEBUG neutron.agent.resource_cache [None req-68dad1d4-24c4-4ec7-9a90-90b1df6ca980 None None] Received new resource SecurityGroupRule: SecurityGroupRule(created_at=2019-07-31T08:42:28Z,description='',direction='ingress',ethertype='IPv4',id=2049485e-dce2-4a7f-9eee-9591db38b491,port_range_max=22,port_range_min=22,project_id='3efed2c1d335441296b8b2930d0a9b97',protocol='tcp',remote_group_id=<?>,remote_ip_prefix=0.0.0.0/0,revision_number=0,security_group_id=07c471dd-e29f-402d-8f10-65cd0f99e3f3,updated_at=2019-07-31T08:42:28Z) {{(pid=1137) record_resource_update /opt/stack/neutron/neutron/agent/resource_cache.py:192}}
+7. DEBUG neutron.agent.resource_cache [None req-68dad1d4-24c4-4ec7-9a90-90b1df6ca980 None None] Received new resource SecurityGroupRule: SecurityGroupRule(created_at=2019-07-31T08:42:28Z,description='',direction='ingress',ethertype='IPv4',id=2049485e-dce2-4a7f-9eee-9591db38b491,port_range_max=22,port_range_min=22,project_id='3efed2c1d335441296b8b2930d0a9b97',protocol='tcp',remote_group_id=<?>,remote_ip_prefix=0.0.0.0/0,revision_number=0,security_group_id=07c471dd-e29f-402d-8f10-65cd0f99e3f3,updated_at=2019-07-31T08:42:28Z) {{(pid=1137) record_resource_update /opt/stack/neutron/neutron/agent/resource_cache.py:192}}
 - ['/opt/stack/neutron/neutron/agent/resource_cache.py:192']
 - ['/0,revision_number=0,security_group_id=07c471dd-e29f-402d-8f10-65cd0f99e3f3,updated_at', '/opt/stack/neutron/neutron/agent/resource_cache.py:192']
 
-9. DEBUG neutron.agent.linux.openvswitch_firewall.firewall [None req-68dad1d4-24c4-4ec7-9a90-90b1df6ca980 None None] RULGEN: Rules generated for flow {'direction': u'ingress', 'protocol': 6, 'ethertype': u'IPv4', 'port_range_max': 22, 'source_ip_prefix': '0.0.0.0/0', 'port_range_min': 22} are [{'dl_type': 2048, 'reg_port': 17, 'nw_proto': 6, 'tcp_dst': '0x0016', 'table': 82, 'actions': 'output:17', 'priority': 77}] {{(pid=1137) add_flows_from_rules /opt/stack/neutron/neutron/agent/linux/openvswitch_firewall/firewall.py:1190}}
+8. DEBUG neutron.agent.linux.openvswitch_firewall.firewall [None req-68dad1d4-24c4-4ec7-9a90-90b1df6ca980 None None] RULGEN: Rules generated for flow {'direction': u'ingress', 'protocol': 6, 'ethertype': u'IPv4', 'port_range_max': 22, 'source_ip_prefix': '0.0.0.0/0', 'port_range_min': 22} are [{'dl_type': 2048, 'reg_port': 17, 'nw_proto': 6, 'tcp_dst': '0x0016', 'table': 82, 'actions': 'output:17', 'priority': 77}] {{(pid=1137) add_flows_from_rules /opt/stack/neutron/neutron/agent/linux/openvswitch_firewall/firewall.py:1190}}
 - ['/opt/stack/neutron/neutron/agent/linux/openvswitch_firewall/firewall.py:1190']
 - ['/0', '/opt/stack/neutron/neutron/agent/linux/openvswitch_firewall/firewall.py:1190']
 
@@ -65,3 +59,13 @@ File path obj 가 아닌 객체로 인식 정확도가 매우 낮아졌다.
 1. 19/02/17 17:17:47 DEBUG Client: {{JAVA_HOME}}/bin/java -server -Xmx512m -Djava.io.tmpdir={{PWD}}/tmp -Dspark.yarn.app.container.log.dir=<LOG_DIR> org.apache.spark.deploy.yarn.ExecutorLauncher --arg 'master:32987' --properties-file {{PWD}}/spark_conf/spark_conf.properties 1> <LOG_DIR>/stdout 2> <LOG_DIR>/stderr
 - ['/bin/java', '/spark_conf/spark_conf.properties', '/stderr']
 - ['/bin/java', '/tmp', '/spark_conf/spark_conf.properties', '/stdout', '/stderr']
+
+
+## 해결
+1. DEBUG glance.api.middleware.version_negotiation [None req-6e2682d5-3d9f-4625-8c9c-e11bbc815796 demo admin] Determining version of request: GET /v2/images Accept: */* {{(pid=1308) process_request /opt/stack/glance/glance/api/middleware/version_negotiation.py:45}}
+- ['/opt/stack/glance/glance/api/middleware/version_negotiation.py:45']
+- ['*/*', '/opt/stack/glance/glance/api/middleware/version_negotiation.py:45']   
+=> * / * : MIME Type (클라이언트에게 전송된 문서의 다양성을 알려주기 위한 메커니즘)   
+=> MIME-Type 은 규칙이 정해져 있으니 Pattern 으로 만들어보는 방법도 좋을 거 같다!!!
+- openstack 로그 데이터에서 발생한 예외
+- MIME-Type 인식 패턴을 추가 후 이를 제거한 log data에서 file path를 인식함으로써 문제 해결
