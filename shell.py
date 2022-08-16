@@ -1,7 +1,8 @@
 import sys
 import click
-from LogObjParser import LogObjParser
+from LogObjParser.LogParser import LogParser
 from Analysis import Path_Analysis
+
 BASIC_PATH = "./logdata/"
 
 
@@ -12,7 +13,7 @@ def main(path=BASIC_PATH, test=None):
     if test == "path":
         return Path_Analysis.Path_Analysis().run(path)
     else:
-        return LogObjParser.LogParser(path).run()  # LogObjParser 객체 실행
+        return LogParser(path).run()  # LogObjParser 객체 실행
 
 
 if __name__ == '__main__':
