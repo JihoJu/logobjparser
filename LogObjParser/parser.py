@@ -107,7 +107,7 @@ def get_path_objs(log: str):
     sub_regex = pattern.upload_sub_path_regex()
 
     # file path obj 인식 전 get_ip_objs 함수가 인식한 ip objs 를 log 에서 subtract
-    sub_ip_objs = get_ip_objs(log, pattern.IP_GROK.regex_obj)
+    sub_ip_objs = get_ip_objs(log)
     for obj in sub_ip_objs:
         log = log.replace(obj, SUB_SIGN)
 
