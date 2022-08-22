@@ -38,7 +38,7 @@ def get_dataset(path, typename, function):
     dataset.close()
 
 
-types = ["hadoop", "mongodb", "openstack", "spark"]
+types = ["cassandra", "hadoop", "mongodb", "openstack", "spark", "test"]
 start = time.time()
 for type_name in types:
     get_dataset("../logdata", type_name, get_path_objs)
