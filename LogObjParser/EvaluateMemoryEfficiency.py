@@ -1,44 +1,50 @@
-import ast
-import csv
-import pandas as pd
+from multiprocessing import Pool
+from LogObjParser.parser import get_path_objs
+from concurrent.futures import ThreadPoolExecutor
 
 
 def read_data(path: str):
-    """ Return log data & correct list after reading correct dataset
+    """ Return log data after reading log dataset (Generator)
 
-    :return: (log: str, answer: list) => answer: 정답 obj 리스트
+    :return: log -> str
     """
-    dataset = pd.read_csv(path)  # 정답 데이터 셋을 읽음
-
-    for row in dataset.itertuples():
-        yield row[1], ast.literal_eval(row[2])  # row[2]: str type -> ast.literal_eval 로 파이썬 리스트 객체로 변환
-
-
-def masking(log: str, labeled_obj: list, mask_obj: str):
-    for obj in labeled_obj:
-        log = log.replace(obj, mask_obj)
-
-    return log
+    with open(path, 'r') as f:
+        for log in f.readlines():
+            yield log.strip()
 
 
 class EvaluateMemoryEfficiency:
-    def __init__(self, read_path, write_path, mask_obj):
-        self.read_path = read_path
-        self.write_path = write_path
+    """ Evaluate Memory Efficiency Class
+
+    이후에 확장성을 고려해 일단 class 로 구성
+    """
+
+    def __init__(self, mask_obj):
         self.mask_obj = mask_obj
 
-    def run(self):
-        data = read_data(self.read_path)
+    def masking(self, log: str):
+        """ Masking file path obj to specified obj in a log
 
-        masked_dataset = open(self.write_path, "w")
-        writer = csv.writer(masked_dataset)
+        :param log: A log data
+        :return: 특정 str 객체로 치환된 log data
+        """
+        for path_obj in get_path_objs(log):  # file path obj 인식
+            log = log.replace(path_obj, self.mask_obj)  # mask_obj: 치환 string 객체
 
-        for log, labeled_obj in data:
-            masked_log = masking(log, labeled_obj, self.mask_obj)
-            writer.writerow([masked_log])
-
-        masked_dataset.close()
+        return log + '\n'  # 비효율,,, -> 문자열 객체를 다시 생성하기에,,,
 
 
-eme = EvaluateMemoryEfficiency("../dataset/mongodb/mongodb_labeled.csv", '../dataset/masked_dataset.csv', "@path")
-eme.run()
+if __name__ == '__main__':
+    data = read_data('../logdata/openstack_clean_seorin.log')
+
+    eme = EvaluateMemoryEfficiency('@path')
+
+    # Multi-processing process 개수 8개
+    with Pool(8) as p:
+        result = p.map(eme.masking, data)
+
+    # iter 객체를 파일에 쓰는 IO-bound Task
+    # 쓰레드 사용 x: 1.8795 / 멀티 스레드(8) 사용: 0.0323
+    with open("../dataset/masked_openstack.log", 'w') as wf:
+        with ThreadPoolExecutor(8) as executor:
+            executor.map(wf.write, result)
