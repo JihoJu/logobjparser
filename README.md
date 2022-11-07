@@ -4,19 +4,20 @@ Known string objects are: Time, Date, IP address, XML, Json, file path, json, xm
 
 ## Data
 
-- cassandra - 2만개
-- mongodb - 4만개
-- hadoop - 10만개
-- openstack - 8만개
-- spark - 4만개
-
-위의 log data 를 사용했습니다. 
+- cassandra - 51,318개
+- mongodb - 144,269개
+- hadoop - 222,955개
+- openstack - 420,554개
+- spark - 150,530개
+- test - 440,963개
 
 ## Parsing
 
-- **Time**, **Date**, **IP address**, **File path** Object
+- **Time**, **Date**, **IP address**, **URI** Object
   - pygrok Library 를 사용했습니다.
   - grok pattern 활용하여 custom grok pattern 만든 후 이를 활용했습니다.
+- **File path** Object
+  - 데이터 레이블링 작업 후, Bert 모델를 활용해 file path 판별 로직을 구현 중에 있습니다.
 - **Json** Object
   - log data 에서 Parenthesis('{', '}') 가 valid 한 경우를 json 이라 가정합니다.
   - json format 이라 가정한 object 가 정말 json format 인지를 검증 과정 수행합니다.
