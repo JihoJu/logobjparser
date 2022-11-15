@@ -48,7 +48,7 @@ class TrainDataGenerator:
         """
         if len(line) != 0:
             log, obj = line
-            word_list = self.add_specific_word_to_list(self.preprocessing(log))
+            word_list = self.convert_wordlist_to_circular_queue(self.preprocessing(log))
             self.sentence_list = self.transform_words_to_sentence(word_list)
             return self.add_target_to_sentence(ast.literal_eval(obj))
         return None
@@ -94,6 +94,16 @@ class TrainDataGenerator:
         :return:
         """
         return ['#'] * self.mid_index + words + ['#'] * self.mid_index
+
+    def convert_wordlist_to_circular_queue(self, words: List) -> List:
+        """ 문장으로 구성할 word list를 circular queue 형태가 되게끔 word 구성
+        :param words: word list
+        :return: circular queue 형태 word list(문장으로 구성할 단어 개수 기반)
+        """
+        if len(words) - self.mid_index >= 0:
+            return words[len(words) - self.mid_index:] + words + words[:self.mid_index]
+        lead_tail_words = words * self.mid_index
+        return lead_tail_words[len(lead_tail_words) - self.mid_index:] + words + lead_tail_words[:self.mid_index]
 
     def split_log_to_word(self, log) -> List:
         """ log split -> strip
